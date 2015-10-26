@@ -25,7 +25,7 @@ namespace DaocClientLib
 	/// <summary>
 	/// Description of MyClass.
 	/// </summary>
-	public class MyClass
+	public class ClientDataWrapper
 	{
 		
 	}
