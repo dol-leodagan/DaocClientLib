@@ -74,14 +74,16 @@ namespace DaocClientLib
 			public ushort Xmax { get { return BitConverter.ToUInt16(m_Data, 8); } }
 			public ushort Ymax { get { return BitConverter.ToUInt16(m_Data, 10); } }
 			/// <summary>
-			///
+			/// Horizontal Res
 			/// </summary>
 			public ushort Hres1 { get { return BitConverter.ToUInt16(m_Data, 12); } }
 			/// <summary>
-			///
+			/// Vertical Res
 			/// </summary>
 			public ushort Vres1 { get { return BitConverter.ToUInt16(m_Data, 14); } }
-			
+			/// <summary>
+			/// Palerre
+			/// </summary>
 			public byte[] Palette
 			{
 				get
@@ -92,23 +94,23 @@ namespace DaocClientLib
 				}				
 			}
 			/// <summary>
-			///
+			/// Reserved Byte
 			/// </summary>
 			public byte Reserved { get { return m_Data[64]; } }
 			/// <summary>
-			///
+			/// Colour Planes
 			/// </summary>
 			public byte Colour_Planes { get { return m_Data[65]; } }
 			/// <summary>
-			///
+			/// Bytes per Line
 			/// </summary>
 			public ushort Bytes_Per_Line { get { return BitConverter.ToUInt16(m_Data, 66); } }
 			/// <summary>
-			///
+			/// Palette Type
 			/// </summary>
 			public ushort Palette_Type { get { return BitConverter.ToUInt16(m_Data, 68); } }
 			/// <summary>
-			///
+			/// Filler Bytes
 			/// </summary>
 			public byte[] Filler
 			{
@@ -120,16 +122,16 @@ namespace DaocClientLib
 				}
 			}
 			/// <summary>
-			///
+			/// Width
 			/// </summary>
 			public int Width { get { return Xmax - Xmin + 1; } }
 			/// <summary>
-			///
+			/// Height
 			/// </summary>
 			public int Height { get { return Ymax - Ymin + 1; } }
 
 			/// <summary>
-			///
+			/// Build PCXHeader from Byte Array
 			/// </summary>
 			public PCXHeader(byte[] p_Data)
 			{
@@ -154,7 +156,7 @@ namespace DaocClientLib
 
 		#region constructors
 		/// <summary>
-		///
+		/// Decode a PCX Image from file path
 		/// </summary>
 		public PCXDecoder(string p_FileFullName)
 		{
@@ -167,7 +169,7 @@ namespace DaocClientLib
 		}
 		
 		/// <summary>
-		///
+		/// Decode PCX Image from byte array
 		/// </summary>
 		public PCXDecoder(byte[] p_Data)
 		{
