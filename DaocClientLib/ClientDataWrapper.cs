@@ -115,6 +115,14 @@ namespace DaocClientLib
 		/// Retrieve Client Craft Recipes Data
 		/// </summary>
 		public virtual CraftDataRecipe[] CraftRecipes { get { return CraftListData.RecipesFromFileBytes(m_clientFiles.GetFileDataFromPackage(CraftPackage, CraftFile)); } }
+		
+		const string ZonesDatPackage = "zones.mpk";
+		const string ZonesDatFiles = "zones.dat";
+		
+		/// <summary>
+		/// Retrieve Client Zones List Data
+		/// </summary>
+		public virtual ZoneData[] ZonesData { get { return ZoneDataList.ZonesFromFileBytes(m_clientFiles.GetFileDataFromPackage(ZonesDatPackage, ZonesDatFiles)); } }
 		#endregion
 	}
 }

@@ -69,9 +69,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TinyMPK.cs" />
     <Compile Include="TinyMPKFile.cs" />
+    <Compile Include="Zone\ZoneData.cs" />
+    <Compile Include="Zone\ZoneDataList.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Craft" />
+    <Folder Include="Zone" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
