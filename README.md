@@ -1,7 +1,7 @@
 # DaocClientLib
-C# .NET Library for handling Dark Age of Camelot Client ressources
+C# .NET Library for handling Dark Age of Camelot Client resources
 
-This DLL is meant to be linked in any project that needs to acces Dark Age of Camelot Client ressources for parsing various content.
+This DLL is meant to be linked in any project that needs to access Dark Age of Camelot Client resources for parsing various content.
 
 ## Binaries
 
