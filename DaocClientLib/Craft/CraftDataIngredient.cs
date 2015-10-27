@@ -31,7 +31,7 @@ namespace DaocClientLib
 	/// <summary>
 	/// Craft Recipe's Ingredient
 	/// </summary>
-	public class CraftDataIngredient
+	public sealed class CraftDataIngredient
 	{
 		/// <summary>
 		/// Ingredient Name

@@ -54,6 +54,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -66,6 +67,7 @@
     <Compile Include="Craft\CraftDataRecipe.cs" />
     <Compile Include="Craft\CraftFileUtils.cs" />
     <Compile Include="Craft\CraftListData.cs" />
+    <Compile Include="PCXDecoder.cs" />
     <Compile Include="Tree\TreeData.cs" />
     <Compile Include="Tree\TreeReplacementMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -33,7 +33,7 @@ namespace DaocClientLib
 	/// <summary>
 	/// Structure of Binary Craft List Header
 	/// </summary>
-	class CraftHeader
+	sealed class CraftHeader
 	{
 		public uint Version;
 		public uint NameListSize;
@@ -57,7 +57,7 @@ namespace DaocClientLib
 	/// <summary>
 	/// Structure of Binary Craft List Item
 	/// </summary>
-	class CraftItem
+	sealed class CraftItem
 	{
 		public uint NameIndex;
 		public uint BaseMaterial;
@@ -82,7 +82,7 @@ namespace DaocClientLib
 	/// <summary>
 	/// Structure of Binary Craft List Profession Data
 	/// </summary>
-	class CraftProfessionData
+	sealed class CraftProfessionData
 	{
 		//201 empty bytes...
 		public ushort[] Empty;
@@ -109,7 +109,7 @@ namespace DaocClientLib
 	/// <summary>
 	/// Structure of Binary Craft List Category
 	/// </summary>
-	class CraftCategory
+	sealed class CraftCategory
 	{
 		public uint NameIndex;
 		// 50 Recipe ID ?

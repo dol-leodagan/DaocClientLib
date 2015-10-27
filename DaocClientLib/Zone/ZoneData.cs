@@ -33,68 +33,68 @@ namespace DaocClientLib
 	/// <summary>
 	/// Zone Data Object
 	/// </summary>
-	public class ZoneData
+	public sealed class ZoneData
 	{
 		/// <summary>
 		/// Zone Header Identifier
 		/// </summary>
-		public string ZoneHeader { get; protected set; }
+		public string ZoneHeader { get; private set; }
 		/// <summary>
 		/// Zone is Enabled
 		/// </summary>
-		public bool Enabled { get; protected set; }
+		public bool Enabled { get; private set; }
 		/// <summary>
 		/// Zone ID
 		/// </summary>
-		public short ID { get; protected set; }
+		public short ID { get; private set; }
 		/// <summary>
 		/// Zone Type (Default -1)
 		/// </summary>
-		public short Type { get; protected set; }
+		public short Type { get; private set; }
 		/// <summary>
 		/// Zone Region (Default -1)
 		/// </summary>
-		public short Region { get; protected set; }
+		public short Region { get; private set; }
 		/// <summary>
 		/// Zone Name (default null)
 		/// </summary>
-		public string Name { get; protected set; }
+		public string Name { get; private set; }
 		/// <summary>
 		/// Zone OffsetX (Default -1)
 		/// </summary>
-		public short OffsetX { get; protected set; }
+		public short OffsetX { get; private set; }
 		/// <summary>
 		/// Zone OffsetY (Default -1)
 		/// </summary>
-		public short OffsetY { get; protected set; }
+		public short OffsetY { get; private set; }
 		/// <summary>
 		/// Zone Width (Default -1)
 		/// </summary>
-		public short Width { get; protected set; }
+		public short Width { get; private set; }
 		/// <summary>
 		/// Zone Height (Default -1)
 		/// </summary>
-		public short Height { get; protected set; }
+		public short Height { get; private set; }
 		/// <summary>
 		/// Zone Temperature (Default short.Minvalue)
 		/// </summary>
-		public short Temperature { get; protected set; }
+		public short Temperature { get; private set; }
 		/// <summary>
 		/// Zone Entry Music ID (Default -1)
 		/// </summary>
-		public short EntryMusic { get; protected set; }
+		public short EntryMusic { get; private set; }
 		/// <summary>
 		/// Zone SkyDome Descriptor (Default null)
 		/// </summary>
-		public string SkyDome { get; protected set; }
+		public string SkyDome { get; private set; }
 		/// <summary>
 		/// Zone Map is Enabled (Default true)
 		/// </summary>
-		public bool MapEnabled { get; protected set; }
+		public bool MapEnabled { get; private set; }
 		/// <summary>
 		/// Zone Proxy Zone (Default -1)
 		/// </summary>
-		public short ProxyZone { get; protected set; }
+		public short ProxyZone { get; private set; }
 		
 		/// <summary>
 		/// Zone Data Object From header String and Dictionary of Var=Value

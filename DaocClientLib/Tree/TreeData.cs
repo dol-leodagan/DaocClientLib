@@ -31,37 +31,37 @@ namespace DaocClientLib
 	/// <summary>
 	/// TreeData is an override map for client Tree's Position and Model
 	/// </summary>
-	public class TreeData
+	public sealed class TreeData
 	{
 		/// <summary>
 		/// Tree Offset on the X axis
 		/// </summary>
-		public float OffsetX { get; protected set; }
+		public float OffsetX { get; private set; }
 		/// <summary>
 		/// Tree Offset on the Y axis (Map Axis not 3D Axis !)
 		/// </summary>
-		public float OffsetY { get; protected set; }
+		public float OffsetY { get; private set; }
 		/// <summary>
 		/// Tree Offset on the Z axis (Map Height not 3D Axis !)
 		/// </summary>
-		public float OffsetZ { get; protected set; }
+		public float OffsetZ { get; private set; }
 		
 		/// <summary>
 		/// Nif Replacement Name
 		/// </summary>
-		public string RealNif { get; protected set; }
+		public string RealNif { get; private set; }
 		/// <summary>
 		/// Replacement SPT file
 		/// </summary>
-		public string Replacement { get; protected set; }
+		public string Replacement { get; private set; }
 		/// <summary>
 		/// Tree Bark Texture
 		/// </summary>
-		public string BarkTexture { get; protected set; }
+		public string BarkTexture { get; private set; }
 		/// <summary>
 		/// Tree Leaf Texture
 		/// </summary>
-		public string LeafTexture { get; protected set; }
+		public string LeafTexture { get; private set; }
 		
 		/// <summary>
 		/// Create from Treemap Data (Replacement doesn't seem to be used)
@@ -108,7 +108,7 @@ namespace DaocClientLib
 		/// <summary>
 		/// Default Value initialization
 		/// </summary>
-		protected TreeData()
+		private TreeData()
 		{
 			OffsetX = 0;
 			OffsetY = 0;

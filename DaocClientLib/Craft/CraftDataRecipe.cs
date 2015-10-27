@@ -32,7 +32,7 @@ namespace DaocClientLib
 	/// <summary>
 	/// Craft Recipe
 	/// </summary>
-	public class CraftDataRecipe
+	public sealed class CraftDataRecipe
 	{
 		/// <summary>
 		/// Recipe ID

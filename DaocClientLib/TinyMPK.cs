@@ -36,7 +36,7 @@ namespace DaocClientLib.MPK
 	/// <summary>
 	/// Handles the reading and writing to MPK files.
 	/// </summary>
-	public class TinyMPK : IEnumerable<KeyValuePair<string, TinyMPKFile>>
+	public sealed class TinyMPK : IEnumerable<KeyValuePair<string, TinyMPKFile>>
 	{
 		/// <summary>
 		/// The magic at the top of the file

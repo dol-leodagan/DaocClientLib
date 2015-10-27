@@ -32,7 +32,7 @@ namespace DaocClientLib.MPK
 	/// <summary>
 	/// Represents a file stored in an MPK archive.
 	/// </summary>
-	public class TinyMPKFile
+	public sealed class TinyMPKFile
 	{
 		/// <summary>
 		/// Byte From Extracted File
@@ -47,7 +47,7 @@ namespace DaocClientLib.MPK
 		/// <summary>
 		/// In-Archive File Name
 		/// </summary>
-		public string Name { get; protected set; }
+		public string Name { get; private set; }
 		
 		/// <summary>
 		/// Constructs a new MPK file entry
