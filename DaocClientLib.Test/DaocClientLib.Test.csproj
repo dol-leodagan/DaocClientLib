@@ -1,20 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <PropertyGroup>
-    <ProjectGuid>{B902618C-DA35-4C20-AEEB-C1D80912B527}</ProjectGuid>
+    <ProjectGuid>{61E498F1-DAF0-4D8D-8FAC-13D37F6E13BE}</ProjectGuid>
     <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Library</OutputType>
-    <RootNamespace>DaocClientLib</RootNamespace>
-    <AssemblyName>DaocClientLib</AssemblyName>
+    <RootNamespace>DaocClientLib.Test</RootNamespace>
+    <AssemblyName>DaocClientLib.Test</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
-    <NoStdLib>False</NoStdLib>
-    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
-    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -26,7 +21,6 @@
     <Optimize>False</Optimize>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -36,52 +30,31 @@
     <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Platform)' == 'x64' ">
-    <PlatformTarget>x64</PlatformTarget>
-    <BaseAddress>4194304</BaseAddress>
-    <RegisterForComInterop>False</RegisterForComInterop>
-    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
-    <FileAlignment>4096</FileAlignment>
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ICSharpCode.SharpZipLib">
-      <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientDataExtensions.cs" />
-    <Compile Include="ClientDataWrapper.cs" />
-    <Compile Include="Craft\CraftDataIngredient.cs" />
-    <Compile Include="Craft\CraftDataRecipe.cs" />
-    <Compile Include="Craft\CraftFileUtils.cs" />
-    <Compile Include="Craft\CraftListData.cs" />
-    <Compile Include="PCXDecoder.cs" />
-    <Compile Include="Tree\TreeData.cs" />
-    <Compile Include="Tree\TreeReplacementMap.cs" />
+    <Compile Include="ClientDataWrapperTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TinyMPK.cs" />
-    <Compile Include="TinyMPKFile.cs" />
-    <Compile Include="Zone\ZoneData.cs" />
-    <Compile Include="Zone\ZoneDataList.cs" />
-    <Compile Include="Zone\ZoneGeometry.cs" />
-    <Compile Include="Zone\ZoneGeometryChooser.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Craft" />
-    <Folder Include="Tree" />
-    <Folder Include="Zone" />
+    <ProjectReference Include="..\DaocClientLib\DaocClientLib.csproj">
+      <Project>{B902618C-DA35-4C20-AEEB-C1D80912B527}</Project>
+      <Name>DaocClientLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
