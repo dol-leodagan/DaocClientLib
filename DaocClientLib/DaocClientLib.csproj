@@ -62,9 +62,16 @@
   <ItemGroup>
     <Compile Include="ClientDataExtensions.cs" />
     <Compile Include="ClientDataWrapper.cs" />
+    <Compile Include="Craft\CraftDataIngredient.cs" />
+    <Compile Include="Craft\CraftDataRecipe.cs" />
+    <Compile Include="Craft\CraftFileUtils.cs" />
+    <Compile Include="Craft\CraftListData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TinyMPK.cs" />
     <Compile Include="TinyMPKFile.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Craft" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

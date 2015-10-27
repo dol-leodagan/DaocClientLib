@@ -106,5 +106,15 @@ namespace DaocClientLib
 			m_clientFiles = path.GetFiles("*", SearchOption.AllDirectories)
 				.Where(f => m_fileFilters.Any(r => Regex.IsMatch(f.Name, r))).ToArray();
 		}
+		
+		#region global accessors
+		const string CraftPackage = "ifd.mpk";
+		const string CraftFile = "tdl.crf";
+		
+		/// <summary>
+		/// Retrieve Client Craft Recipes Data
+		/// </summary>
+		public virtual CraftDataRecipe[] CraftRecipes { get { return CraftListData.RecipesFromFileBytes(m_clientFiles.GetFileDataFromPackage(CraftPackage, CraftFile)); } }
+		#endregion
 	}
 }

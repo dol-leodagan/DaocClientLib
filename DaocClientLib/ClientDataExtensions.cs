@@ -25,6 +25,7 @@
  */
 
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -85,7 +86,7 @@ namespace DaocClientLib
 		/// <param name="packageName"></param>
 		/// <param name="fileName"></param>
 		/// <returns>File Byte Array</returns>
-		public static byte[] GetFileDataFromPackage(this ClientDataWrapper data, string packageName, string fileName)
+		public static byte[] GetFileDataFromPackage(this FileInfo[] data, string packageName, string fileName)
 		{
 			if (data == null)
 				throw new ArgumentNullException("data");
@@ -94,7 +95,7 @@ namespace DaocClientLib
 			if (string.IsNullOrEmpty(fileName))
 				throw new ArgumentNullException("fileName");
 			
-			var pack = data.ClientFiles.FirstOrDefault(file => file.Name.Equals(packageName, StringComparison.OrdinalIgnoreCase));
+			var pack = data.FirstOrDefault(file => file.Name.Equals(packageName, StringComparison.OrdinalIgnoreCase));
 			
 			if(pack == null)
 				throw new System.IO.FileNotFoundException("Package could not be found !", packageName);
@@ -108,14 +109,14 @@ namespace DaocClientLib
 		/// <param name="data"></param>
 		/// <param name="packageName"></param>
 		/// <returns>File Byte Array</returns>
-		public static IDictionary<string, byte[]> GetAllFileDataFromPackage(this ClientDataWrapper data, string packageName)
+		public static IDictionary<string, byte[]> GetAllFileDataFromPackage(this FileInfo[] data, string packageName)
 		{
 			if (data == null)
 				throw new ArgumentNullException("data");
 			if (string.IsNullOrEmpty(packageName))
 				throw new ArgumentNullException("packageName");
 			
-			var pack = data.ClientFiles.FirstOrDefault(file => file.Name.Equals(packageName, StringComparison.OrdinalIgnoreCase));
+			var pack = data.FirstOrDefault(file => file.Name.Equals(packageName, StringComparison.OrdinalIgnoreCase));
 			
 			if(pack == null)
 				throw new System.IO.FileNotFoundException("Package could not be found !", packageName);
