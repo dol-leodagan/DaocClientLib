@@ -3,6 +3,12 @@ C# .NET Library for handling Dark Age of Camelot Client ressources
 
 This DLL is meant to be linked in any project that needs to acces Dark Age of Camelot Client ressources for parsing various content.
 
+## Build
+
+[![Build status](https://ci.appveyor.com/api/projects/status/moxcav0dfgji12d1?svg=true)](https://ci.appveyor.com/project/dol-leodagan/daocclientlib)
+
+Download : https://github.com/dol-leodagan/DaocClientLib/releases/latest
+
 ## How to use
 
     using DaocClientLib;
