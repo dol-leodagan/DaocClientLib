@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("DaocClientLib")]
-[assembly: AssemblyCopyright("GNU GPL")]
+[assembly: AssemblyCopyright("MIT (c) dol-leodagan")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
