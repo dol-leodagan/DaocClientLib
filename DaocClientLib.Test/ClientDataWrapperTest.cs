@@ -35,7 +35,7 @@ namespace DaocClientLib.Test
 		/// <summary>
 		/// An Inexisting Path to Test
 		/// </summary>
-		public const string WrongClientPath = @"Z:" + Path.PathSeparator + "SomeWrongDir" + Path.PathSeparator + "Nowhere to be found";
+		public string WrongClientPath { get { return "Z:" + Path.PathSeparator + "SomeWrongDir" + Path.PathSeparator + "Nowhere to be found"; } }
 		
 		/// <summary>
 		/// Test Loading a null directory for Argument Exception
