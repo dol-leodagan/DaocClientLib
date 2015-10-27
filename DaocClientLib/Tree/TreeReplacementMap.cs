@@ -38,12 +38,12 @@ namespace DaocClientLib
 		/// <summary>
 		/// Tree Map Data
 		/// </summary>
-		Dictionary<string, TreeData> TreeMap;
+		readonly Dictionary<string, TreeData> TreeMap;
 		
 		/// <summary>
 		/// Tree Cluster Data Appended with Tree Map Data
 		/// </summary>
-		Dictionary<string, IEnumerable<TreeData>> TreeCluster;
+		readonly Dictionary<string, IEnumerable<TreeData>> TreeCluster;
 		
 		/// <summary>
 		/// Retrieve the given Tree Name Overrides
@@ -72,6 +72,16 @@ namespace DaocClientLib
 		}
 		
 		/// <summary>
+		/// Warnings during Parse
+		/// </summary>
+		protected List<Exception> m_Warnings = new List<Exception>();
+		
+		/// <summary>
+		/// Get Warnings that occured during parse 
+		/// </summary>
+		public Exception[] Warnings { get { return m_Warnings.ToArray(); } }
+
+		/// <summary>
 		/// Build Tree Replacement Map from Tree Map and Tree Cluster CSV's
 		/// </summary>
 		/// <param name="treeMap"></param>
@@ -80,7 +90,17 @@ namespace DaocClientLib
 		{
 			// Create Single Tree Map
 			TreeMap = treeMap.Where(l => l.Count() > 4)
-				.ToDictionary(l => l.First().ToLower(), l => new TreeData(l.First(), l.ElementAt(1), l.ElementAt(2), l.ElementAt(3), short.Parse(l.ElementAt(4))));
+				.ToDictionary(l => l.First().ToLower(), l => {
+				              	try
+				              	{
+				              		return new TreeData(l.First(), l.ElementAt(1), l.ElementAt(2), l.ElementAt(3), short.Parse(l.ElementAt(4)));
+				              	}
+				              	catch (Exception e)
+				              	{
+				              		m_Warnings.Add(new NotSupportedException(string.Format("Could not parse Tree Map Data '{0}' from CSV", l.First().ToLower()), e));
+				              		return null;
+				              	}
+				              });
 			
 			// Create Cluster Tree Map
 			TreeCluster = new Dictionary<string, IEnumerable<TreeData>>();
@@ -91,6 +111,8 @@ namespace DaocClientLib
 				if (count > 1)
 				{
 					var originName = cluster.First().ToLower();
+					if (originName.Equals("name", StringComparison.OrdinalIgnoreCase))
+						continue;
 					var targetName = cluster.Skip(1).First().ToLower();
 					TreeData treeConstraint;
 					var zOffset = 0f;
@@ -108,8 +130,23 @@ namespace DaocClientLib
 					// get X, Y, Z for each instance
 					for (int i = 2 ; i < count-2 ; i += 3)
 					{
-						list.Add(new TreeData(targetName, float.Parse(cluster.ElementAt(i)), float.Parse(cluster.ElementAt(i+1)), float.Parse(cluster.ElementAt(i+2))+zOffset,
-						                     replacement, barktex, leaftex));
+						try
+						{
+							var x = float.Parse(cluster.ElementAt(i));
+							var y = float.Parse(cluster.ElementAt(i+1));
+							var z = float.Parse(cluster.ElementAt(i+2));
+							
+							// empty data
+							if (x == 0f && y == 0f && z == 0f)
+								continue;
+							
+							list.Add(new TreeData(targetName, x, y, z+zOffset,
+							                      replacement, barktex, leaftex));
+						}
+						catch (Exception e)
+						{
+							m_Warnings.Add(new NotSupportedException(string.Format("Could not parse Tree Cluster Data '{0}'(index {1} - {2}) from CSV", originName, i, i+2), e));
+						}
 					}
 				
 					TreeCluster.Add(originName, list.ToArray());

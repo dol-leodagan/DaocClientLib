@@ -41,12 +41,32 @@ namespace DaocClientLib
 		public ZoneData[] Zones { get; protected set; }
 		
 		/// <summary>
+		/// Warnings during Parse
+		/// </summary>
+		protected List<Exception> m_Warnings = new List<Exception>();
+		
+		/// <summary>
+		/// Get Warnings that occured during parse 
+		/// </summary>
+		public Exception[] Warnings { get { return m_Warnings.ToArray(); } }
+		
+		/// <summary>
 		/// Zone Data List from Parsed DAT Content
 		/// </summary>
 		/// <param name="content"></param>
 		public ZoneDataList(IDictionary<string, IDictionary<string, string>> content)
 		{
-			Zones = content.Select(kv => new ZoneData(kv.Key, kv.Value)).ToArray();
+			Zones = content.Select(kv => {
+			                       	try
+			                       	{
+			                       		return new ZoneData(kv.Key, kv.Value);
+			                       	}
+			                       	catch (Exception e)
+			                       	{
+			                       		m_Warnings.Add(new NotSupportedException(string.Format("Could not parse Zone Data '{0}' from List", kv.Key), e));
+			                       		return null;
+			                       	}
+			                       }).Where(val => val != null).ToArray();
 		}
 		
 		/// <summary>

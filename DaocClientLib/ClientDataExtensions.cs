@@ -98,7 +98,7 @@ namespace DaocClientLib
 			var pack = data.FirstOrDefault(file => file.Name.Equals(packageName, StringComparison.OrdinalIgnoreCase));
 			
 			if(pack == null)
-				throw new System.IO.FileNotFoundException("Package could not be found !", packageName);
+				throw new FileNotFoundException("Package could not be found !", packageName);
 			
 			return new TinyMPK(pack.FullName)[fileName].Data;
 		}
@@ -119,7 +119,7 @@ namespace DaocClientLib
 			var pack = data.FirstOrDefault(file => file.Name.Equals(packageName, StringComparison.OrdinalIgnoreCase));
 			
 			if(pack == null)
-				throw new System.IO.FileNotFoundException("Package could not be found !", packageName);
+				throw new FileNotFoundException("Package could not be found !", packageName);
 			
 			return new TinyMPK(pack.FullName).ToDictionary(k => k.Key, v => v.Value.Data);
 		}
