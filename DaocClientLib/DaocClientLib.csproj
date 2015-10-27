@@ -66,6 +66,8 @@
     <Compile Include="Craft\CraftDataRecipe.cs" />
     <Compile Include="Craft\CraftFileUtils.cs" />
     <Compile Include="Craft\CraftListData.cs" />
+    <Compile Include="Tree\TreeData.cs" />
+    <Compile Include="Tree\TreeReplacementMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TinyMPK.cs" />
     <Compile Include="TinyMPKFile.cs" />
@@ -74,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Craft" />
+    <Folder Include="Tree" />
     <Folder Include="Zone" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

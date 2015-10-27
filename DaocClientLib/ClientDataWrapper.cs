@@ -123,6 +123,23 @@ namespace DaocClientLib
 		/// Retrieve Client Zones List Data
 		/// </summary>
 		public virtual ZoneData[] ZonesData { get { return ZoneDataList.ZonesFromFileBytes(m_clientFiles.GetFileDataFromPackage(ZonesDatPackage, ZonesDatFiles)); } }
+		
+		const string TreeMapPackage = "treemap.mpk";
+		const string TreeMapFile = "treemap.csv";
+		const string TreeClusterPackage = "tree_clusters.mpk";
+		const string TreeClusterFile = "tree_clusters.csv";
+		
+		/// <summary>
+		/// Retrieve Client Tree Replacement Map
+		/// </summary>
+		public virtual TreeReplacementMap TreeReplacement
+		{
+			get
+			{
+				return new TreeReplacementMap(m_clientFiles.GetFileDataFromPackage(TreeMapPackage, TreeMapFile).ReadCSVFile(),
+				                              m_clientFiles.GetFileDataFromPackage(TreeClusterPackage, TreeClusterFile).ReadCSVFile());
+			}
+		}
 		#endregion
 	}
 }
