@@ -41,6 +41,10 @@ namespace DaocClientLib
 		public RiverBank[] Banks { get; private set; }
 		
 		/// <summary>
+		/// River ID
+		/// </summary>
+		public int ID { get; private set; }
+		/// <summary>
 		/// River Name
 		/// </summary>
 		public string Name { get; private set; }
@@ -93,9 +97,10 @@ namespace DaocClientLib
 		/// <summary>
 		/// Load River from Values
 		/// </summary>
-		public RiverGeometry(string name, string type, string texture, string multitexture, short flow, int height, int color, int extend_posx, int extend_posy,
+		public RiverGeometry(int id, string name, string type, string texture, string multitexture, short flow, int height, int color, int extend_posx, int extend_posy,
 		                     int extend_negx, int extend_negy, short tesselation, IEnumerable<Tuple<IEnumerable<short>, IEnumerable<short>>> banks)
 		{
+			ID = id;
 			Name = name;
 			Type = type;
 			Texture = texture;

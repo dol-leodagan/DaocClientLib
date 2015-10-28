@@ -57,6 +57,18 @@ namespace DaocClientLib
 		/// This Zone Sector.dat File Name
 		/// </summary>
 		private string SectorFile { get { return "sector.dat"; } }
+		/// <summary>
+		/// This Zone Terrain File Name
+		/// </summary>
+		private string TerrainFile { get { return "terrain.pcx"; } }
+		/// <summary>
+		/// This Zone Offset File Name
+		/// </summary>
+		private string OffsetFile { get { return "offset.pcx"; } }
+		/// <summary>
+		/// This Zone Offset File Name
+		/// </summary>
+		private string WaterFile { get { return "water.pcx"; } }
 		
 		/// <summary>
 		/// This Zone ID
@@ -85,6 +97,69 @@ namespace DaocClientLib
 		/// This Zone Rivers
 		/// </summary>
 		public RiverGeometry[] Rivers { get; protected set; }
+		
+		#region getter
+		/// <summary>
+		/// Get Terrain Height Map Indexed By Pixel X*Y
+		/// </summary>
+		public float[][] TerrainHeightMap
+		{
+			get
+			{
+				var terrainImg = m_files.GetFileDataFromPackage(DatPackage, TerrainFile);
+				var offsetImg = m_files.GetFileDataFromPackage(DatPackage, OffsetFile);
+				
+				var terrainPcx = new PCXDecoder(terrainImg).PcxImage;
+				var offsetPcx = new PCXDecoder(offsetImg).PcxImage;
+				
+				var map = new float[terrainPcx.Width][];
+				
+				for (int x = 0 ; x < terrainPcx.Width ; x++)
+				{
+					map[x] = new float[terrainPcx.Height];
+					for (int y = 0 ; y < terrainPcx.Height ; y++)
+					{
+						var terrainVal = terrainPcx.GetPixel(x, y).R / (float)TerrainFactor * (float)TerrainScale;
+						var offsetVal = offsetPcx.GetPixel(x, y).R / (float)TerrainFactor * (float)TerrainOffset;
+						map[x][y] = terrainVal + offsetVal;
+					}
+				}
+				
+				return map;
+			}
+		}
+		
+		/// <summary>
+		/// Get Terrain Water Index Map, Only existing Water defs are presents in the Collection
+		/// </summary>
+		public IDictionary<int, IDictionary<int, RiverGeometry>> WaterIndexMap
+		{
+			get
+			{
+				var waterImg = m_files.GetFileDataFromPackage(DatPackage, WaterFile);
+				var waterPcx = new PCXDecoder(waterImg).PcxImage;
+				var result = new Dictionary<int, IDictionary<int, RiverGeometry>>();
+				for (int x = 0 ; x < waterPcx.Width ; x++)
+				{
+					for (int y = 0 ; y < waterPcx.Height ; y++)
+					{
+						var grey = waterPcx.GetPixel(x, y).R;
+						var river = grey < Rivers.Length ? Rivers.FirstOrDefault(r => r.ID == grey) : null;
+						
+						if (river != null)
+						{
+							if (!result.ContainsKey(x))
+								result[x] = new Dictionary<int, RiverGeometry>();
+
+							result[x][y] = river;
+						}
+					}
+				}
+				
+				return result;
+			}
+		}
+		#endregion
 		
 		public ZoneGeometry(int id, IEnumerable<FileInfo> files)
 		{
@@ -128,7 +203,7 @@ namespace DaocClientLib
 				SizeX = -1;
 				SizeY = -1;
 			}
-			
+			// Read Water Definitions
 			IDictionary<string, string> waterdefs;
 			if (sectorDat.TryGetValue("waterdefs", out waterdefs))
 			{
@@ -184,7 +259,7 @@ namespace DaocClientLib
 								banks.Add(new Tuple<IEnumerable<short>, IEnumerable<short>>(left.Split(',').Select(s => short.Parse(s)), right.Split(',').Select(s => short.Parse(s))));
 							}
 							
-							var riverGeo = new RiverGeometry(name, type, texture, multitexture, r_flow, r_height, r_color, r_extend_posx, r_extend_posy, r_extend_negx, r_extend_negy, r_tesselation, banks);
+							var riverGeo = new RiverGeometry(w, name, type, texture, multitexture, r_flow, r_height, r_color, r_extend_posx, r_extend_posy, r_extend_negx, r_extend_negy, r_tesselation, banks);
 							rivers.Add(riverGeo);
 						}
 					}
