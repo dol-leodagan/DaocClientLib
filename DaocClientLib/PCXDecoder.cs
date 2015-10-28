@@ -281,11 +281,11 @@ namespace DaocClientLib
 				if (_Position > _EndBytesLength) break; //
 				byte _Data = p_Data[_Position];
 				
-				if (_Data > 0xC0)
+				if (m_Head.Encoding > 0 && _Data > 0xC0)
 				{
 					int _Count = _Data - 0xC0;
 					_Position++;
-					for (int i = 0; i != _Count; i++)
+					for (int i = 0; i < _Count; i++)
 					{
 						if (i + _ReadIndex >= _LineWidth)          //2009-6-12 RLE
 						{
@@ -295,7 +295,8 @@ namespace DaocClientLib
 							i = 0;
 						}
 						int _RVA = ((i + _ReadIndex) * 3) + _WriteIndex;
-						_ReturnBytes[_RVA] = p_Data[_Position];
+						var dat = p_Data[_Position];
+						_ReturnBytes[_RVA] = dat;
 					}
 					_ReadIndex += _Count;
 					_Position++;
@@ -307,6 +308,7 @@ namespace DaocClientLib
 					_Position++;
 					_ReadIndex++;
 				}
+				
 				if (_ReadIndex >= _LineWidth)
 				{
 					_WriteIndex--;
@@ -335,11 +337,11 @@ namespace DaocClientLib
 				if (_Position > _EndBytesLength) break; //
 				
 				byte _Data = p_Data[_Position];
-				if (_Data > 0xC0)
+				if (m_Head.Encoding > 0 && _Data > 0xC0)
 				{
 					int _Count = _Data - 0xC0;
 					_Position++;
-					for (int i = 0; i != _Count; i++)
+					for (int i = 0; i < _Count; i++)
 					{
 						_ReturnBytes[i + _ReadIndex] = p_Data[_Position];
 					}
