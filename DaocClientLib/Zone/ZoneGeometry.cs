@@ -25,6 +25,9 @@
  */
 
 using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.IO;
 
 namespace DaocClientLib
 {
@@ -34,17 +37,164 @@ namespace DaocClientLib
 	public class ZoneGeometry
 	{
 		/// <summary>
-		/// Game Unit to 3D Scape Factor
-		/// </summary>
-		public const float UnitFactor = TerrainFactor/65535f;
-		
-		/// <summary>
 		/// Terrain Max Integer Unit
 		/// </summary>
 		public const byte TerrainFactor = 255;
+		/// <summary>
+		/// Game Unit to 3D Scape Factor
+		/// </summary>
+		public const float UnitFactor = TerrainFactor/65535f;
+
+		/// <summary>
+		/// This Zone Files
+		/// </summary>
+		private readonly FileInfo[] m_files;
+		/// <summary>
+		/// This Zone DAT Package
+		/// </summary>
+		private string DatPackage { get { return string.Format("dat{0}", ID.ToString("000")); } }
+		/// <summary>
+		/// This Zone Sector.dat File Name
+		/// </summary>
+		private string SectorFile { get { return "sector.dat"; } }
 		
-		public ZoneGeometry()
+		/// <summary>
+		/// This Zone ID
+		/// </summary>
+		public int ID { get; protected set; }
+		
+		/// <summary>
+		/// This Zone Terrain Scale
+		/// </summary>
+		public short TerrainScale { get; protected set; }
+		/// <summary>
+		/// This Zone Terrain Offset
+		/// </summary>
+		public short TerrainOffset { get; protected set; }
+		
+		/// <summary>
+		/// This Zone Sector X Size
+		/// </summary>
+		public short SizeX { get; protected set; }
+		/// <summary>
+		/// This Zone Sector Y Size
+		/// </summary>
+		public short SizeY { get; protected set; }
+		
+		/// <summary>
+		/// This Zone Rivers
+		/// </summary>
+		public RiverGeometry[] Rivers { get; protected set; }
+		
+		public ZoneGeometry(int id, IEnumerable<FileInfo> files)
 		{
+			ID = id;
+			m_files = files.ToArray();
+			IDictionary<string, IDictionary<string, string>> sectorDat;
+			try
+			{
+				sectorDat = m_files.GetFileDataFromPackage(DatPackage, SectorFile).ReadDATFile();
+			}
+			catch (Exception e)
+			{
+				throw new ArgumentException(string.Format("No sector.dat Found when building Zone ID: {0}", id), "files", e);
+			}
+			
+			// Read Terrain
+			IDictionary<string, string> terrain;
+			if (sectorDat.TryGetValue("terrain", out terrain))
+			{
+				string scalefactor;
+				string offsetfactor;
+				TerrainScale = terrain.TryGetValue("scalefactor", out scalefactor) ? short.Parse(scalefactor) : (short)-1;
+				TerrainOffset = terrain.TryGetValue("offsetfactor", out offsetfactor) ? short.Parse(offsetfactor) : (short)-1;
+			}
+			else
+			{
+				TerrainScale = -1;
+				TerrainOffset = -1;
+			}
+			// Read Sector Size			
+			IDictionary<string, string> sectorsize;
+			if (sectorDat.TryGetValue("sectorsize", out sectorsize))
+			{
+				string sizex;
+				string sizey;
+				SizeX = sectorsize.TryGetValue("sizex", out sizex) ? short.Parse(sizex) : (short)-1;
+				SizeY = sectorsize.TryGetValue("sizey", out sizey) ? short.Parse(sizey) : (short)-1;
+			}
+			else
+			{
+				SizeX = -1;
+				SizeY = -1;
+			}
+			
+			IDictionary<string, string> waterdefs;
+			if (sectorDat.TryGetValue("waterdefs", out waterdefs))
+			{
+				string num;
+				var rivers = new List<RiverGeometry>();
+				if (waterdefs.TryGetValue("num", out num))
+				{
+					var numWater = short.Parse(num);
+					for (int w = 0 ; w < numWater ; w++)
+					{
+						IDictionary<string, string> river;
+						if (sectorDat.TryGetValue(string.Format("river{0}", w.ToString("00")), out river))
+						{
+							string texture;
+							string multitexture;
+							string flow;
+							string height;
+							string bankpoints;
+							string color;
+							string extend_posx;
+							string extend_posy;
+							string extend_negx;
+							string extend_negy;
+							string tesselation;
+							string name;
+							string type;
+							
+							short r_flow = river.TryGetValue("flow", out flow) ? short.Parse(flow) : (short)0;
+							int r_height = river.TryGetValue("height", out height) ? int.Parse(height) : -1;
+							short r_bankpoints = river.TryGetValue("bankpoints", out bankpoints) ? short.Parse(bankpoints) : (short)0;
+							int r_color = river.TryGetValue("color", out color) ? int.Parse(color) : 0;
+							int r_extend_posx = river.TryGetValue("extend_posx", out extend_posx) ? int.Parse(extend_posx) : 0;
+							int r_extend_posy = river.TryGetValue("extend_posy", out extend_posy) ? int.Parse(extend_posy) : 0;
+							int r_extend_negx = river.TryGetValue("extend_negx", out extend_negx) ? int.Parse(extend_negx) : 0;
+							int r_extend_negy = river.TryGetValue("extend_negy", out extend_negy) ? int.Parse(extend_negy) : 0;
+							short r_tesselation = river.TryGetValue("tesselation", out tesselation) ? short.Parse(tesselation) : (short)0;
+							
+							river.TryGetValue("texture", out texture);
+							river.TryGetValue("multitexture", out multitexture);
+							river.TryGetValue("name", out name);
+							river.TryGetValue("type", out type);
+							
+							var banks = new List<Tuple<IEnumerable<short>, IEnumerable<short>>>();
+							for (int b = 0 ; b < r_bankpoints ; b++)
+							{
+								string left;
+								string right;
+								if (!river.TryGetValue(string.Format("left{0}", b.ToString("00")), out left))
+									continue;
+								if (!river.TryGetValue(string.Format("right{0}", b.ToString("00")), out right))
+									continue;
+								
+								banks.Add(new Tuple<IEnumerable<short>, IEnumerable<short>>(left.Split(',').Select(s => short.Parse(s)), right.Split(',').Select(s => short.Parse(s))));
+							}
+							
+							var riverGeo = new RiverGeometry(name, type, texture, multitexture, r_flow, r_height, r_color, r_extend_posx, r_extend_posy, r_extend_negx, r_extend_negy, r_tesselation, banks);
+							rivers.Add(riverGeo);
+						}
+					}
+				}
+				Rivers = rivers.ToArray();
+			}
+			else
+			{
+				Rivers = new RiverGeometry[0];
+			}
 		}
 	}
 }

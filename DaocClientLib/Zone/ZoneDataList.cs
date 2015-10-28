@@ -27,23 +27,33 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace DaocClientLib
 {
 	/// <summary>
 	/// Client Zone Data List
 	/// </summary>
-	public class ZoneDataList
+	public sealed class ZoneDataList
 	{
+		/// <summary>
+		/// Zone Suffix Regex
+		/// </summary>
+		public const string ZoneRegEx =  @"\d{1,3}$";
+		/// <summary>
+		/// Zone Prefix
+		/// </summary>
+		public const string ZonePrefix =  "zone";
+
 		/// <summary>
 		/// Zone Data Collection
 		/// </summary>
-		public ZoneData[] Zones { get; protected set; }
+		public ZoneData[] Zones { get; private set; }
 		
 		/// <summary>
 		/// Warnings during Parse
 		/// </summary>
-		protected List<Exception> m_Warnings = new List<Exception>();
+		private List<Exception> m_Warnings = new List<Exception>();
 		
 		/// <summary>
 		/// Get Warnings that occured during parse 
@@ -56,17 +66,18 @@ namespace DaocClientLib
 		/// <param name="content"></param>
 		public ZoneDataList(IDictionary<string, IDictionary<string, string>> content)
 		{
-			Zones = content.Select(kv => {
-			                       	try
-			                       	{
-			                       		return new ZoneData(kv.Key, kv.Value);
-			                       	}
-			                       	catch (Exception e)
-			                       	{
-			                       		m_Warnings.Add(new NotSupportedException(string.Format("Could not parse Zone Data '{0}' from List", kv.Key), e));
-			                       		return null;
-			                       	}
-			                       }).Where(val => val != null).ToArray();
+			Zones = content.Where(kv => Regex.IsMatch(kv.Key, string.Format("{0}{1}", ZonePrefix, ZoneRegEx), RegexOptions.IgnoreCase))
+				.Select(kv => {
+				        	try
+				        	{
+				        		return new ZoneData(kv.Key, kv.Value);
+				        	}
+				        	catch (Exception e)
+				        	{
+				        		m_Warnings.Add(new NotSupportedException(string.Format("Could not parse Zone Data '{0}' from List", kv.Key), e));
+				        		return null;
+				        	}
+				        }).Where(val => val != null).ToArray();
 		}
 		
 		/// <summary>

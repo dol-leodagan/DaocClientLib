@@ -25,14 +25,31 @@
  */
 
 using System;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace DaocClientLib
 {
 	/// <summary>
 	/// ZoneGeometryChooser indexes all Zones Geometry Data
 	/// </summary>
-	public class ZoneGeometryChooser
+	public sealed class ZoneGeometryChooser
 	{
+		/// <summary>
+		/// Zone Suffix Regex
+		/// </summary>
+		public const string ZoneRegEx =  @"\d{1,3}$";
+		/// <summary>
+		/// Zone Prefix
+		/// </summary>
+		public const string ZonePrefix =  "zone";
+		/// <summary>
+		/// Zone Directories indexed by ID
+		/// </summary>
+		private readonly Dictionary<int, FileInfo[]> m_zoneDict;
+		
 		/// <summary>
 		/// Get Geometry Data From Zone Index
 		/// </summary>
@@ -40,12 +57,16 @@ namespace DaocClientLib
 		{
 			get
 			{
-				return null;
+				FileInfo[] files;
+				return m_zoneDict.TryGetValue(Index, out files) ? new ZoneGeometry(Index, files) : null;
 			}
 		}
 		
-		public ZoneGeometryChooser()
+		public ZoneGeometryChooser(ClientDataWrapper client)
 		{
+			m_zoneDict = client.ClientFiles.Where(f => Regex.IsMatch(f.Directory.Name, string.Format("{0}{1}", ZonePrefix, ZoneRegEx), RegexOptions.IgnoreCase))
+				.GroupBy(f => f.Directory.Name)
+				.ToDictionary(k => Convert.ToInt32(new string(k.Key.Skip(ZonePrefix.Length).ToArray())), k => k.ToArray());
 		}
 	}
 }

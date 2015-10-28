@@ -295,8 +295,7 @@ namespace DaocClientLib
 							i = 0;
 						}
 						int _RVA = ((i + _ReadIndex) * 3) + _WriteIndex;
-						var dat = p_Data[_Position];
-						_ReturnBytes[_RVA] = dat;
+						_ReturnBytes[_RVA] = p_Data[_Position];
 					}
 					_ReadIndex += _Count;
 					_Position++;
