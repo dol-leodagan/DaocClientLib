@@ -55,7 +55,78 @@ namespace DaocClientLib.Test
 		}
 		#endregion
 		
+		#region test constructor
+		/// <summary>
+		/// Test Constructor with null Byte array
+		/// </summary>
+		[Test]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void TestPCXImageConstructorWithNullByteArray()
+		{
+			byte[] test = null;
+			new PCXDecoder(test);
+		}
+		
+		/// <summary>
+		/// Test Constructor with null string
+		/// </summary>
+		[Test]
+		[ExpectedException(typeof(ArgumentNullException))]
+		public void TestPCXImageConstructorWithNullString()
+		{
+			string test = null;
+			new PCXDecoder(test);
+		}
+		
+		/// <summary>
+		/// Test Constructor with empty Byte array
+		/// </summary>
+		[Test]
+		[ExpectedException(typeof(ArgumentException))]
+		public void TestPCXImageConstructorWithShortByteArray()
+		{
+			var test = new byte[0];
+			new PCXDecoder(test);
+		}
+		
+		/// <summary>
+		/// Test Constructor with missing file
+		/// </summary>
+		[Test]
+		[ExpectedException(typeof(FileNotFoundException))]
+		public void TestPCXImageConstructorWithWrongPath()
+		{
+			var test = "nonexistingimg.pcx";
+			new PCXDecoder(test);
+		}
+		
+		/// <summary>
+		/// Test Constructor with no valid magic byte
+		/// </summary>
+		[Test]
+		[ExpectedException(typeof(ArgumentException))]
+		public void TestPCXImageConstructorWithWrongByteArray()
+		{
+			var test = new byte[]{ 0 };
+			new PCXDecoder(test);
+		}
+		
+		/// <summary>
+		/// Test Constructor with no valid Header
+		/// </summary>
+		[Test]
+		[ExpectedException(typeof(ArgumentException))]
+		public void TestPCXImageConstructorWithWrongHeaderArray()
+		{
+			var test = new byte[]{ 0x0A };
+			new PCXDecoder(test);
+		}
+		#endregion
+		
 		#region test decoder
+		/// <summary>
+		/// Test PCX Grid 8bpp no RLE
+		/// </summary>
 		[Test]
 		public void TestPCXImageLoading8()
 		{
@@ -81,6 +152,9 @@ namespace DaocClientLib.Test
 			}
 		}
 		
+		/// <summary>
+		/// Test PCX Grid 24bpp no RLE
+		/// </summary>
 		[Test]
 		public void TestPCXImageLoading24()
 		{
@@ -106,6 +180,9 @@ namespace DaocClientLib.Test
 			}
 		}
 		
+		/// <summary>
+		/// Test PCX Grid 8bpp with RLE
+		/// </summary>
 		[Test]
 		public void TestPCXImageLoading8RLE()
 		{
@@ -131,6 +208,9 @@ namespace DaocClientLib.Test
 			}
 		}
 		
+		/// <summary>
+		/// Test PCX Grid 24bpp with RLE
+		/// </summary>
 		[Test]
 		public void TestPCXImageLoading24RLE()
 		{
