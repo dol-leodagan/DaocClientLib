@@ -97,10 +97,15 @@ namespace DaocClientLib
 			
 			var pack = data.FirstOrDefault(file => file.Name.Equals(packageName, StringComparison.OrdinalIgnoreCase));
 			
-			if(pack == null)
+			if (pack == null)
 				throw new FileNotFoundException("Package could not be found !", packageName);
 			
-			return new TinyMPK(pack.FullName)[fileName].Data;
+			var result = new TinyMPK(pack.FullName)[fileName];
+			
+			if (result == null)
+				throw new FileNotFoundException(string.Format("File could not be found in package {0} !", packageName), fileName);
+			
+			return result.Data;
 		}
 		
 		/// <summary>

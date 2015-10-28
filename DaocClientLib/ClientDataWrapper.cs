@@ -105,6 +105,11 @@ namespace DaocClientLib
 			// Filter All files recursively against Regex strings
 			m_clientFiles = path.GetFiles("*", SearchOption.AllDirectories)
 				.Where(f => m_fileFilters.Any(r => Regex.IsMatch(f.Name, r))).ToArray();
+			
+			if (!m_clientFiles.Any(f => f.Name.Equals("camelot.exe", StringComparison.OrdinalIgnoreCase)))
+				throw new NotSupportedException(string.Format("camelot.exe could not be found, make sure directory {0} is a client setup !", path.FullName));
+			if (!m_clientFiles.Any(f => f.Name.Equals("game.dll", StringComparison.OrdinalIgnoreCase)))
+				throw new NotSupportedException(string.Format("game.dll could not be found, make sure directory {0} is a client setup !", path.FullName));
 		}
 		
 		#region global accessors
