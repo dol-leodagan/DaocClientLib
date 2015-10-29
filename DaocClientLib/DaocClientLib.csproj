@@ -84,6 +84,7 @@
     <Compile Include="Zone\ZoneDataList.cs" />
     <Compile Include="Zone\ZoneGeometry.cs" />
     <Compile Include="Zone\ZoneGeometryChooser.cs" />
+    <Compile Include="Zone\ZoneJump.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Craft" />

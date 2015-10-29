@@ -69,6 +69,14 @@ namespace DaocClientLib
 		/// This Zone Offset File Name
 		/// </summary>
 		private string WaterFile { get { return "water.pcx"; } }
+		/// <summary>
+		/// This Zone JumpPoint File Name
+		/// </summary>
+		private string ZoneJumpFile { get { return "zonejump.csv"; } }		
+		/// <summary>
+		/// This Zone JumpPoint File Name
+		/// </summary>
+		private string BoundFile { get { return "bound.csv"; } }
 		
 		/// <summary>
 		/// This Zone ID
@@ -98,7 +106,7 @@ namespace DaocClientLib
 		/// </summary>
 		public RiverGeometry[] Rivers { get; protected set; }
 		
-		#region getter
+		#region data getter
 		/// <summary>
 		/// Get Terrain Height Map Indexed By Pixel X*Y
 		/// </summary>
@@ -159,8 +167,74 @@ namespace DaocClientLib
 				return result;
 			}
 		}
+		
+		/// <summary>
+		/// Get Zone Jump Point List
+		/// </summary>
+		public IDictionary<int, ZoneJump> ZoneJumps
+		{
+			get
+			{
+				var zonejumpfile = m_files.GetFileDataFromPackage(DatPackage, ZoneJumpFile);
+				var result = new Dictionary<int, ZoneJump>();
+				foreach(var row in zonejumpfile.ReadCSVFile())
+				{
+					if (row.Length < 9)
+						continue;
+					
+					short id = short.Parse(row[8]);
+					short order = short.Parse(row[0]);
+					string name = row[1];
+					int x1 = int.Parse(row[2]);
+					int y1 = int.Parse(row[3]);
+					int x2 = int.Parse(row[4]);
+					int y2 = int.Parse(row[5]);
+					int z1 = int.Parse(row[6]);
+					int z2 = int.Parse(row[7]);
+					
+					var jump = new ZoneJump(id, order, name, x1, y1, x2, y2, z1, z2);
+					
+					result.Add(id, jump);
+				}
+				
+				return result;
+			}
+		}
+		
+		/// <summary>
+		/// Get Zone Bounds Coordinates, Shape from X/Y line points
+		/// </summary>
+		public Tuple<int, int>[][] Bounds
+		{
+			get
+			{
+				var zoneboundfile = m_files.GetFileDataFromPackage(DatPackage, BoundFile);
+				var result = new List<Tuple<int, int>[]>();
+				foreach (var row in zoneboundfile.ReadCSVFile())
+				{
+					if (row.Length < 2)
+						continue;
+					
+					int count = int.Parse(row[1]) * 2;
+					var subresult = new List<Tuple<int, int>>();
+					for (int i = 0 ; i < count ; i=i+2)
+					{
+						subresult.Add(new Tuple<int, int>(row[i], row[i+1]));
+					}
+					
+					result.Add(subresult.ToArray());
+				}
+				
+				return result.ToArray();
+			}
+		}
 		#endregion
 		
+		/// <summary>
+		/// Default Construtor Intialize Values with Sector.Dat
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="files"></param>
 		public ZoneGeometry(int id, IEnumerable<FileInfo> files)
 		{
 			ID = id;
