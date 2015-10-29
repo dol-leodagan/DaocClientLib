@@ -73,6 +73,7 @@
     <Compile Include="PCXDecoderTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TinyMPKTest.cs" />
+    <Compile Include="ZoneGeometryTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DaocClientLib\DaocClientLib.csproj">

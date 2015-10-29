@@ -219,7 +219,7 @@ namespace DaocClientLib
 					var subresult = new List<Tuple<int, int>>();
 					for (int i = 0 ; i < count ; i=i+2)
 					{
-						subresult.Add(new Tuple<int, int>(row[i], row[i+1]));
+						subresult.Add(new Tuple<int, int>(int.Parse(row[i]), int.Parse(row[i+1])));
 					}
 					
 					result.Add(subresult.ToArray());
@@ -237,6 +237,9 @@ namespace DaocClientLib
 		/// <param name="files"></param>
 		public ZoneGeometry(int id, IEnumerable<FileInfo> files)
 		{
+			if (files == null)
+				throw new ArgumentNullException("files");
+			
 			ID = id;
 			m_files = files.ToArray();
 			IDictionary<string, IDictionary<string, string>> sectorDat;
@@ -246,7 +249,7 @@ namespace DaocClientLib
 			}
 			catch (Exception e)
 			{
-				throw new ArgumentException(string.Format("No sector.dat Found when building Zone ID: {0}", id), "files", e);
+				throw new ArgumentException(string.Format("No usable sector.dat Found when building Zone ID: {0}", id), "files", e);
 			}
 			
 			// Read Terrain

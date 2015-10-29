@@ -78,7 +78,7 @@ namespace DaocClientLib.Test
 		/// <summary>
 		/// Path where is stored Valid Test MPK
 		/// </summary>
-		public string ValidMPKPath { get { return TemporaryPath + Path.DirectorySeparatorChar + "existing.mpk"; } }
+		public static string ValidMPKPath { get { return TemporaryPath + Path.DirectorySeparatorChar + "existing.mpk"; } }
 		
 		/// <summary>
 		/// Test CSV String
