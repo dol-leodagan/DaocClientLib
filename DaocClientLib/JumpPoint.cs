@@ -67,19 +67,22 @@ namespace DaocClientLib
 		/// <param name="jumpPointLine"></param>
 		public JumpPoint(IEnumerable<string> jumpPointLine)
 		{
+			if (jumpPointLine == null)
+				throw new ArgumentNullException("jumpPointLine");
+			
 			var count = jumpPointLine.Count();
 			
 			if (count > 6)
 			{
-				ID = int.Parse(jumpPointLine[0]);
-				Name = jumpPointLine[1];
-				ZoneID = int.Parse(jumpPointLine[2]);
-				X = int.Parse(jumpPointLine[3]);
-				Y = int.Parse(jumpPointLine[4]);
-				Z = int.Parse(jumpPointLine[5]);
-				HeadingDegrees = short.Parse(jumpPointLine[6]);
+				ID = int.Parse(jumpPointLine.ElementAt(0));
+				Name = jumpPointLine.ElementAt(1);
+				ZoneID = int.Parse(jumpPointLine.ElementAt(2));
+				X = int.Parse(jumpPointLine.ElementAt(3));
+				Y = int.Parse(jumpPointLine.ElementAt(4));
+				Z = int.Parse(jumpPointLine.ElementAt(5));
+				HeadingDegrees = short.Parse(jumpPointLine.ElementAt(6));
 				// Remaining ID's seems to be Mirror Zone, 0 can't be used as it looks like a "default" in the file...
-				AlsoInZoneID = jumpPointLine.Skip().Where(s => !string.IsNullOrEmpty(s)).Select(s => int.Parse(s)).Where(id => id > 0).ToArray();
+				AlsoInZoneID = jumpPointLine.Skip(7).Where(s => !string.IsNullOrEmpty(s)).Select(s => { int i; return int.TryParse(s, out i) ? i : 0; }).Where(id => id > 0).ToArray();
 			}
 			else
 			{

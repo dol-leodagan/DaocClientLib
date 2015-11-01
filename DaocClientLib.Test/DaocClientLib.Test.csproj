@@ -69,6 +69,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientDataWrapperImportTest.cs" />
     <Compile Include="ClientDataWrapperTest.cs" />
     <Compile Include="PCXDecoderTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

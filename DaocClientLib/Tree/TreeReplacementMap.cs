@@ -48,7 +48,7 @@ namespace DaocClientLib
 		/// <summary>
 		/// Retrieve the given Tree Name Overrides
 		/// </summary>
-		public IEnumerable<TreeData> this[string treename]
+		public TreeData[] this[string treename]
 		{
 			get
 			{
@@ -58,7 +58,7 @@ namespace DaocClientLib
 				
 				if (TreeCluster.TryGetValue(index, out tc))
 				{
-					return tc;
+					return tc.ToArray();
 				}
 				
 				TreeData tm;
@@ -68,6 +68,17 @@ namespace DaocClientLib
 				}
 				
 				return new [] { new TreeData(treename, "", "", "", 0) };
+			}
+		}
+		
+		/// <summary>
+		/// Get Key Collection for all registered mapping
+		/// </summary>
+		public IEnumerable<string> Keys
+		{
+			get
+			{
+				return TreeCluster.Keys.Union(TreeMap.Keys);
 			}
 		}
 		
@@ -88,8 +99,14 @@ namespace DaocClientLib
 		/// <param name="treeCluster"></param>
 		public TreeReplacementMap(IEnumerable<IEnumerable<string>> treeMap, IEnumerable<IEnumerable<string>> treeCluster)
 		{
+			if (treeMap == null)
+				throw new ArgumentNullException("treeMap");
+
+			if (treeCluster == null)
+				throw new ArgumentNullException("treeCluster");
+			
 			// Create Single Tree Map
-			TreeMap = treeMap.Where(l => l.Count() > 4)
+			TreeMap = treeMap.Where(l => l.Count() > 4 && !l.First().Equals("NIF Name", StringComparison.OrdinalIgnoreCase))
 				.ToDictionary(l => l.First().ToLower(), l => {
 				              	try
 				              	{
@@ -100,7 +117,8 @@ namespace DaocClientLib
 				              		m_Warnings.Add(new NotSupportedException(string.Format("Could not parse Tree Map Data '{0}' from CSV", l.First().ToLower()), e));
 				              		return null;
 				              	}
-				              });
+				              })
+				.Where(kv => kv.Value != null).ToDictionary(kv => kv.Key, kv => kv.Value);
 			
 			// Create Cluster Tree Map
 			TreeCluster = new Dictionary<string, IEnumerable<TreeData>>();
@@ -147,6 +165,12 @@ namespace DaocClientLib
 						{
 							m_Warnings.Add(new NotSupportedException(string.Format("Could not parse Tree Cluster Data '{0}'(index {1} - {2}) from CSV", originName, i, i+2), e));
 						}
+					}
+					
+					if (list.Count == 0)
+					{
+						m_Warnings.Add(new NotSupportedException(string.Format("Empty Tree Cluster Data '{0}' from CSV, not adding !", originName)));
+						continue;
 					}
 				
 					TreeCluster.Add(originName, list.ToArray());
