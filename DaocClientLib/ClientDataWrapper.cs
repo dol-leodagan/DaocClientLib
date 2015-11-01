@@ -47,6 +47,11 @@ namespace DaocClientLib
 		public string[] FileFilters { get { return m_fileFilters; } }
 		
 		/// <summary>
+		/// File loading Filters. (Regex)
+		/// </summary>
+		public static string[] DefaultFilters { get { return new []{ @"camelot\.exe", @"game\.dll", @".+\.mpk|.+\.npk", @".+\.nif|.+\.nhd", @".+\.pcx|.+\.tga|.+\.bmp|.+\.dds", @".+\.csv" }; } }
+		
+		/// <summary>
 		/// Client Files Detected
 		/// </summary>
 		private readonly FileInfo[] m_clientFiles;
@@ -94,7 +99,7 @@ namespace DaocClientLib
 			if (filters != null)
 				m_fileFilters = filters;
 			else
-				m_fileFilters = new []{ @"camelot\.exe", @"game\.dll", @".+\.mpk|.+\.npk", @".+\.nif|.+\.nhd", @".+\.pcx|.+\.tga|.+\.bmp|.+\.dds", @".+\.csv" };
+				m_fileFilters = DefaultFilters;
 			
 			if (path == null)
 				throw new ArgumentNullException("path");
@@ -122,12 +127,12 @@ namespace DaocClientLib
 		public virtual CraftDataRecipe[] CraftRecipes { get { return CraftListData.RecipesFromFileBytes(m_clientFiles.GetFileDataFromPackage(CraftPackage, CraftFile)); } }
 		
 		const string ZonesDatPackage = "zones.mpk";
-		const string ZonesDatFiles = "zones.dat";
+		const string ZonesDatFile = "zones.dat";
 		
 		/// <summary>
 		/// Retrieve Client Zones List Data
 		/// </summary>
-		public virtual ZoneData[] ZonesData { get { return ZoneDataList.ZonesFromFileBytes(m_clientFiles.GetFileDataFromPackage(ZonesDatPackage, ZonesDatFiles)); } }
+		public virtual ZoneData[] ZonesData { get { return ZoneDataList.ZonesFromFileBytes(m_clientFiles.GetFileDataFromPackage(ZonesDatPackage, ZonesDatFile)); } }
 		
 		const string TreeMapPackage = "treemap.mpk";
 		const string TreeMapFile = "treemap.csv";
@@ -145,6 +150,14 @@ namespace DaocClientLib
 				                              m_clientFiles.GetFileDataFromPackage(TreeClusterPackage, TreeClusterFile).ReadCSVFile());
 			}
 		}
+		
+		const string JumpPointsPackage = "gamedata.mpk";
+		const string JumpPointsFile = "jumppoints.csv";
+		
+		/// <summary>
+		/// Retrieve Hard coded /Jump Points
+		/// </summary>
+		public virtual JumpPoint[] JumpPoints { get { return m_clientFiles.GetFileDataFromPackage(JumpPointsPackage, JumpPointsFile).ReadCSVFile().Select(line => new JumpPoint(line)).ToArray(); } }
 		#endregion
 	}
 }

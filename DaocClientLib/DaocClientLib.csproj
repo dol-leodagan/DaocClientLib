@@ -73,6 +73,7 @@
     <Compile Include="Craft\CraftDataRecipe.cs" />
     <Compile Include="Craft\CraftFileUtils.cs" />
     <Compile Include="Craft\CraftListData.cs" />
+    <Compile Include="JumpPoint.cs" />
     <Compile Include="PCXDecoder.cs" />
     <Compile Include="Tree\TreeData.cs" />
     <Compile Include="Tree\TreeReplacementMap.cs" />
