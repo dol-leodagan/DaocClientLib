@@ -77,6 +77,18 @@ namespace DaocClientLib
 		/// This Zone JumpPoint File Name
 		/// </summary>
 		private string BoundFile { get { return "bound.csv"; } }
+		/// <summary>
+		/// This Zone Dungeon Chunk File
+		/// </summary>
+		private string DungeonChunkFile { get { return "dungeon.chunk"; } }
+		/// <summary>
+		/// This Zone Dungeon Place File
+		/// </summary>
+		private string DungeonPlaceFile { get { return "dungeon.place"; } }
+		/// <summary>
+		/// This Zone Dungeon Props File
+		/// </summary>
+		private string DungeonPropFile { get { return "dungeon.place"; } }
 		
 		/// <summary>
 		/// This Zone ID
@@ -226,6 +238,93 @@ namespace DaocClientLib
 				}
 				
 				return result.ToArray();
+			}
+		}
+		
+		/// <summary>
+		/// Get Dungeon Chunk, Nif file String Index
+		/// </summary>
+		public string[] DungeonChunk
+		{
+			get
+			{
+				return m_files.GetFileDataFromPackage(DatPackage, DungeonChunkFile).ReadCSVFile().Select(line => line.FirstOrDefault()).ToArray();
+			}
+		}
+		
+		/// <summary>
+		/// Get Dungeon Places, Nif File Collection with Transformation Geometry
+		/// </summary>
+		public NifGeometry[] DungeonPlaces
+		{
+			get
+			{
+				var chunks = DungeonChunk;
+				int index = -1;
+				return m_files.GetFileDataFromPackage(DatPackage, DungeonPlaceFile).ReadCSVFile()
+					.Select(line =>
+					        {
+					        	index++;
+					        	if (line.Length < 8)
+					        		return null;
+					        	
+					        	// Chunk Nif Reference
+					        	int nifId = int.Parse(line.First());
+					        	string nifName = chunks[nifId];
+					        	
+					        	float X = float.Parse(line[1]);
+					        	float Y = float.Parse(line[2]);
+					        	float Z = float.Parse(line[3]);
+					        	
+					        	float Angle = float.Parse(line[4]);
+					        	float RotX = float.Parse(line[5]);
+					        	float RotY = float.Parse(line[6]);
+					        	float RotZ = float.Parse(line[7]);
+					        	
+					        	return new NifGeometry(index, nifName, nifName, X, Y, Z, 1f, Angle, RotX, RotY, RotZ, false, false, null);
+					        }
+					       ).Where(nif => nif != null).ToArray();
+			}
+		}
+		
+		/// <summary>
+		/// Get Dungeon Props, Nif File Collection With Transformation relative to Dungeon Places
+		/// </summary>
+		public NifGeometry[] DungeonProps
+		{
+			get
+			{
+				var chunks = DungeonChunk;
+				var places = DungeonPlaces;
+				int index = -1;
+				return m_files.GetFileDataFromPackage(DatPackage, DungeonPropFile).ReadCSVFile()
+					.Select(line =>
+					        {
+					        	index++;
+					        	if (line.Length < 11)
+					        		return null;
+					        	
+					        	// Chunk nif Reference
+					        	int nifId = int.Parse(line.First());
+					        	string nifName = chunks[nifId];
+					        	
+					        	// Place nif Reference
+					        	int placeId = int.Parse(line[9]);
+					        	var place = places.FirstOrDefault(nif => nif.ID == placeId);
+					        	
+					        	float X = float.Parse(line[1]);
+					        	float Y = float.Parse(line[2]);
+					        	float Z = float.Parse(line[3]);
+					        	
+					        	float Angle = float.Parse(line[4]);
+					        	float RotX = float.Parse(line[5]);
+					        	float RotY = float.Parse(line[6]);
+					        	float RotZ = float.Parse(line[7]);
+					        	
+					        	float Scale = float.Parse(line[10]);
+					        	
+					        	return new NifGeometry(index, nifName, nifName, X, Y, Z, Scale, Angle, RotX, RotY, RotZ, false, false, place);
+					        }).Where(nif => nif != null).ToArray();
 			}
 		}
 		#endregion

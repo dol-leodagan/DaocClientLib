@@ -34,6 +34,11 @@ namespace DaocClientLib
 	public sealed class NifGeometry
 	{
 		/// <summary>
+		/// Nif Arbitrary ID
+		/// </summary>
+		public int ID { get; private set; }
+		
+		/// <summary>
 		/// File Name
 		/// </summary>
 		public string FileName { get; private set; }
@@ -83,12 +88,17 @@ namespace DaocClientLib
 		/// Is Mapped to Ground ?
 		/// </summary>
 		public bool OnGround { get; private set; }
+		/// <summary>
+		/// Relatively Placed to Other Nif
+		/// </summary>
+		public NifGeometry RelativeTo { get; private set; }
 		
 		/// <summary>
 		/// Default Constructor
 		/// </summary>
-		public NifGeometry(string file, string textual, float x, float y, float z, float scale, float angle, float rotationX, float rotationY, float rotationZ)
+		public NifGeometry(int id, string file, string textual, float x, float y, float z, float scale, float angle, float rotationX, float rotationY, float rotationZ, bool flip, bool ground, NifGeometry relative)
 		{
+			ID = id;
 			FileName = file;
 			TextualName = textual;
 			X = x;
@@ -99,6 +109,9 @@ namespace DaocClientLib
 			RotationX = rotationX;
 			RotationY = rotationY;
 			RotationZ = rotationZ;
+			Flip = flip;
+			OnGround = ground;
+			RelativeTo = relative;
 		}
 	}
 }

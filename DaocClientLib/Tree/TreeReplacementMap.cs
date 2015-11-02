@@ -67,7 +67,7 @@ namespace DaocClientLib
 					return new [] { tm };
 				}
 				
-				return new [] { new TreeData(treename, "", "", "", 0) };
+				return new TreeData[0];
 			}
 		}
 		
