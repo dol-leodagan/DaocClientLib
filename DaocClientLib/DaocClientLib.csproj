@@ -80,6 +80,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TinyMPK.cs" />
     <Compile Include="TinyMPKFile.cs" />
+    <Compile Include="Zone\NifGeometry.cs" />
     <Compile Include="Zone\RiverGeometry.cs" />
     <Compile Include="Zone\ZoneData.cs" />
     <Compile Include="Zone\ZoneDataList.cs" />

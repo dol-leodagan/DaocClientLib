@@ -215,9 +215,9 @@ namespace DaocClientLib
 					if (row.Length < 2)
 						continue;
 					
-					int count = int.Parse(row[1]) * 2;
+					int count = Math.Min(row.Length - 2, int.Parse(row[1]) * 2) + 2;
 					var subresult = new List<Tuple<int, int>>();
-					for (int i = 0 ; i < count ; i=i+2)
+					for (int i = 2 ; i < count ; i=i+2)
 					{
 						subresult.Add(new Tuple<int, int>(int.Parse(row[i]), int.Parse(row[i+1])));
 					}
