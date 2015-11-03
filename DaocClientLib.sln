@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Niflib", "niflib.net\Niflib
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaocClientLib.Drawing", "DaocClientLib.Drawing\DaocClientLib.Drawing.csproj", "{A2AFACEF-518E-4CC2-8A1A-972B6CFEF648}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaocClientLib.Demo", "DaocClientLib.Demo\DaocClientLib.Demo.csproj", "{F8F6B257-D10D-41DC-9C61-277605369CCA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -86,5 +88,21 @@ Global
 		{A2AFACEF-518E-4CC2-8A1A-972B6CFEF648}.MonoGame|Any CPU.Build.0 = MonoGame|Any CPU
 		{A2AFACEF-518E-4CC2-8A1A-972B6CFEF648}.MonoGame|x64.ActiveCfg = MonoGame|x64
 		{A2AFACEF-518E-4CC2-8A1A-972B6CFEF648}.MonoGame|x64.Build.0 = MonoGame|x64
+		{F8F6B257-D10D-41DC-9C61-277605369CCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8F6B257-D10D-41DC-9C61-277605369CCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8F6B257-D10D-41DC-9C61-277605369CCA}.Debug|x64.ActiveCfg = Debug|x64
+		{F8F6B257-D10D-41DC-9C61-277605369CCA}.Debug|x64.Build.0 = Debug|x64
+		{F8F6B257-D10D-41DC-9C61-277605369CCA}.OpenTK|Any CPU.ActiveCfg = OpenTK|Any CPU
+		{F8F6B257-D10D-41DC-9C61-277605369CCA}.OpenTK|Any CPU.Build.0 = OpenTK|Any CPU
+		{F8F6B257-D10D-41DC-9C61-277605369CCA}.OpenTK|x64.ActiveCfg = OpenTK|x64
+		{F8F6B257-D10D-41DC-9C61-277605369CCA}.OpenTK|x64.Build.0 = OpenTK|x64
+		{F8F6B257-D10D-41DC-9C61-277605369CCA}.SharpDX|Any CPU.ActiveCfg = SharpDX|Any CPU
+		{F8F6B257-D10D-41DC-9C61-277605369CCA}.SharpDX|Any CPU.Build.0 = SharpDX|Any CPU
+		{F8F6B257-D10D-41DC-9C61-277605369CCA}.SharpDX|x64.ActiveCfg = SharpDX|x64
+		{F8F6B257-D10D-41DC-9C61-277605369CCA}.SharpDX|x64.Build.0 = SharpDX|x64
+		{F8F6B257-D10D-41DC-9C61-277605369CCA}.MonoGame|Any CPU.ActiveCfg = MonoGame|Any CPU
+		{F8F6B257-D10D-41DC-9C61-277605369CCA}.MonoGame|Any CPU.Build.0 = MonoGame|Any CPU
+		{F8F6B257-D10D-41DC-9C61-277605369CCA}.MonoGame|x64.ActiveCfg = MonoGame|x64
+		{F8F6B257-D10D-41DC-9C61-277605369CCA}.MonoGame|x64.Build.0 = MonoGame|x64
 	EndGlobalSection
 EndGlobal
