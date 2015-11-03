@@ -89,6 +89,18 @@ namespace DaocClientLib
 		/// This Zone Dungeon Props File
 		/// </summary>
 		private string DungeonPropFile { get { return "dungeon.place"; } }
+		/// <summary>
+		/// This Zone Terrain Nifs File
+		/// </summary>
+		private string TerrainNifFile { get { return "nifs.csv"; } }
+		/// <summary>
+		/// This Zone Terrain Fixtures File
+		/// </summary>
+		private string TerrainFixtureFile { get { return "fixtures.csv"; } }
+		/// <summary>
+		/// This Zone City File
+		/// </summary>
+		private string CityFile { get { return "city.csv"; } }
 		
 		/// <summary>
 		/// This Zone ID
@@ -325,6 +337,86 @@ namespace DaocClientLib
 					        	
 					        	return new NifGeometry(index, nifName, nifName, X, Y, Z, Scale, Angle, RotX, RotY, RotZ, false, false, place);
 					        }).Where(nif => nif != null).ToArray();
+			}
+		}
+		
+		/// <summary>
+		/// Get Terrain Nifs ID to Nif File Dictionary
+		/// </summary>
+		public IDictionary<int, string> TerrainNifs
+		{
+			get
+			{
+				return m_files.GetFileDataFromPackage(DatPackage, TerrainNifFile).ReadCSVFile()
+					.Select(line =>
+					        {
+					        	if (line.Length > 0 && (line[0].StartsWith("Grid Nifs", StringComparison.OrdinalIgnoreCase)
+					        	                        || line[0].StartsWith("NIF", StringComparison.OrdinalIgnoreCase))
+					        	                       || line.Length < 3)
+					        		return new KeyValuePair<int, string>(-1, null);
+					        	
+					        	return new KeyValuePair<int, string>(int.Parse(line[0]), line[2]);
+					        }).Where(kv => kv.Value != null).ToDictionary(kv => kv.Key, kv => kv.Value);
+			}
+		}
+		
+		/// <summary>
+		/// Get Terrain Fixture with Nifs From Terrain Nifs
+		/// </summary>
+		public NifGeometry[] TerrainFixtures
+		{
+			get
+			{
+				var nifs = TerrainNifs;
+				int index = -1;
+				return m_files.GetFileDataFromPackage(DatPackage, TerrainFixtureFile).ReadCSVFile()
+					.Select(line =>
+					        {
+					        	index++;
+					        	if (line.Length < 13 || (line.Length > 0 && line[0].StartsWith("Fixtures", StringComparison.OrdinalIgnoreCase)))
+					        		return null;
+					        	
+					        	string nifname;
+					        	int nifId = int.Parse(line[1]);
+					        	if (!TerrainNifs.TryGetValue(nifId, out nifname))
+					        		return null;
+					        	
+					        	float X = float.Parse(line[3]);
+					        	float Y = float.Parse(line[4]);
+					        	float Z = float.Parse(line[5]);
+					        	int A = int.Parse(line[6]);
+					        	float Scale = int.Parse(line[7]) / 100f;
+					        	bool ground = int.Parse(line[11]) > 0;
+					        	bool flip = int.Parse(line[12]) > 0;
+					        	float Angle = (float)(A * Math.PI / 180);
+					        	float RotX = 0f;
+					        	float RotY = 0f;
+					        	float RotZ = -1f;
+					        	// Long Version
+					        	if (line.Length > 18)
+					        	{
+						        	Angle = float.Parse(line[15]);
+						        	RotX = float.Parse(line[16]);
+						        	RotY = float.Parse(line[17]);
+						        	RotZ = float.Parse(line[18]);
+					        	}
+					        	
+					        	// TODO angle / A ?? Z ??
+					        	return new NifGeometry(index, nifname, line[2], X, Y, Z, Scale, Angle, RotX, RotY, RotZ, flip, ground, null);
+					        }).Where(nif => nif != null).ToArray();
+			}
+		}
+		
+		/// <summary>
+		/// Get City Nifs Files Indexed by ID
+		/// </summary>
+		public IDictionary<int, string> CityNifs
+		{
+			get
+			{
+				return m_files.GetFileDataFromPackage(DatPackage, CityFile).ReadCSVFile()
+					.Where(line => line.Length > 1).Select(line => new KeyValuePair<int, string>(int.Parse(line[0]), line[1]))
+					.ToDictionary(kv => kv.Key, kv => kv.Value);
 			}
 		}
 		#endregion
