@@ -9,11 +9,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DaocClientLib.Test")]
-[assembly: AssemblyDescription("Dark Age of Camelot Setup Ressources Unit Tests")]
+[assembly: AssemblyTitle("DaocClientLib.Drawing")]
+[assembly: AssemblyDescription("Dark Age of Camelot Setup Ressources Wrapper for 3D Drawing")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DaocClientLib.Test")]
+[assembly: AssemblyProduct("DaocClientLib.Drawing")]
 [assembly: AssemblyCopyright("MIT (c) dol-leodagan")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
