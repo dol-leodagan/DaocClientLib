@@ -82,6 +82,14 @@
       <Project>{B902618C-DA35-4C20-AEEB-C1D80912B527}</Project>
       <Name>DaocClientLib</Name>
     </ProjectReference>
+    <ProjectReference Include="..\gwen-donet\GwenCS\Gwen.Renderer.OpenTK\Gwen.Renderer.OpenTK.csproj">
+      <Project>{41650C82-D630-4E5C-845A-F1513C8FDC99}</Project>
+      <Name>Gwen.Renderer.OpenTK</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\gwen-donet\GwenCS\Gwen\Gwen.csproj">
+      <Project>{ADDA2F43-96C0-497F-8216-29C67ABC9806}</Project>
+      <Name>Gwen</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -27,7 +27,11 @@
 namespace DaocClientLib.Demo
 {
 	using System;
-		
+	using DaocClientLib;
+	using DaocClientLib.Drawing;
+	using Gwen;
+	using Gwen.Control;
+	using Gwen.Renderer;
 	/// <summary>
 	/// Class with program entry point.
 	/// </summary>
