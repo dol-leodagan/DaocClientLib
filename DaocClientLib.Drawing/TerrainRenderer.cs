@@ -27,33 +27,19 @@
 namespace DaocClientLib.Drawing
 {
 	using System;
-	
-	#if OpenTK
-	using OpenTK;
-	using Matrix = OpenTK.Matrix4;
-	#elif SharpDX
-	using SharpDX;
-	#elif MonoGame
-	using Microsoft.Xna.Framework;
-	#endif
-	using Niflib;
-	using Niflib.Extensions;
-	
+	using System.IO;
+	using System.Collections.Generic;
+
 	/// <summary>
-	/// ZoneDrawingExtensions Contains Method for Generating 3D Drawing Collections from Client Lib Zone Files
+	/// Zone Renderer For Terrain Type
 	/// </summary>
-	public static class ZoneDrawingExtensions
+	public class TerrainRenderer : ZoneRenderer
 	{
-		public static Vector3 Test()
+		public TerrainRenderer(int id, IEnumerable<FileInfo> files, ZoneType type, ClientDataWrapper wrapper)
+			: base(id, files, type, wrapper)
 		{
-			using (var stream = new System.IO.BinaryReader(new System.IO.MemoryStream(new byte[0])))
-			{
-				var nif = new NiFile(stream);
-			}
-			
-			var test = new ClientDataWrapper("");
-			
-			return new Vector3();
+			foreach(var nif in TerrainNifs)
+				AddNifMesh(nif.Key, nif.Value);
 		}
 	}
 }

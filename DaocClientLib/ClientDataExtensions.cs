@@ -66,17 +66,20 @@ namespace DaocClientLib
 
 			var content = System.Text.Encoding.UTF8.GetString(infile);
 			
+			var cleaned = Regex.Replace(content, @";(.*)$", string.Empty, RegexOptions.Multiline);
+			var matchescleanedup = Regex.Matches(cleaned, @"\[(?<index>.+?)\](?<params>[^\[]+)", RegexOptions.Multiline).OfType<Match>();
 			
-			return Regex.Matches(Regex.Replace(content, @";(.*)$", ""), @"\[(?<index>.+?)\](?<params>[^\[]+)", RegexOptions.Multiline).OfType<Match>()
+			
+			return Regex.Matches(Regex.Replace(content, @";(.*)$", string.Empty, RegexOptions.Multiline), @"\[(?<index>.+?)\](?<params>[^\[]+)", RegexOptions.Multiline).OfType<Match>()
 				.Select(region =>
 				        new KeyValuePair<string, IDictionary<string, string>>(region.Groups["index"].Value.Trim().ToLower(),
 				                                                              Regex.Matches(region.Groups["params"].Value, @"(?<name>[a-z0-9'_\-\. ]+)=(?<value>[a-z0-9'_\-\. ]+)", RegexOptions.Singleline | RegexOptions.IgnoreCase).OfType<Match>()
 				                                                              .Select(sub =>
 				                                                                      new KeyValuePair<string, string>(sub.Groups["name"].Value.Trim().ToLower(),
 				                                                                                                       sub.Groups["value"].Value.Trim()))
-				                                                              .ToDictionary(k => k.Key, v => v.Value)
+				                                                              .GroupBy(kv => kv.Key).Select(grp => grp.First()).ToDictionary(k => k.Key, v => v.Value)
 				                                                             )
-				       ).ToDictionary(k => k.Key, v => v.Value);
+				       ).GroupBy(kv => kv.Key).Select(grp => grp.First()).ToDictionary(k => k.Key, v => v.Value);
 		}
 		
 		/// <summary>

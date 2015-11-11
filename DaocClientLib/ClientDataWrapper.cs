@@ -107,14 +107,14 @@ namespace DaocClientLib
 			if (!path.Exists)
 				throw new FileNotFoundException("Could not Find Daoc Client Directory !", path.FullName);
 			
+			if (!path.EnumerateFiles().Any(f => f.Name.Equals("camelot.exe", StringComparison.OrdinalIgnoreCase)))
+				throw new NotSupportedException(string.Format("camelot.exe could not be found, make sure directory {0} is a client setup !", path.FullName));
+			if (!path.EnumerateFiles().Any(f => f.Name.Equals("game.dll", StringComparison.OrdinalIgnoreCase)))
+				throw new NotSupportedException(string.Format("game.dll could not be found, make sure directory {0} is a client setup !", path.FullName));
+			
 			// Filter All files recursively against Regex strings
 			m_clientFiles = path.GetFiles("*", SearchOption.AllDirectories)
 				.Where(f => m_fileFilters.Any(r => Regex.IsMatch(f.Name, r))).ToArray();
-			
-			if (!m_clientFiles.Any(f => f.Name.Equals("camelot.exe", StringComparison.OrdinalIgnoreCase)))
-				throw new NotSupportedException(string.Format("camelot.exe could not be found, make sure directory {0} is a client setup !", path.FullName));
-			if (!m_clientFiles.Any(f => f.Name.Equals("game.dll", StringComparison.OrdinalIgnoreCase)))
-				throw new NotSupportedException(string.Format("game.dll could not be found, make sure directory {0} is a client setup !", path.FullName));
 		}
 		
 		#region global accessors
@@ -133,6 +133,11 @@ namespace DaocClientLib
 		/// Retrieve Client Zones List Data
 		/// </summary>
 		public virtual ZoneData[] ZonesData { get { return ZoneDataList.ZonesFromFileBytes(m_clientFiles.GetFileDataFromPackage(ZonesDatPackage, ZonesDatFile)); } }
+		
+		/// <summary>
+		/// Retrieve Zone Geometry Index
+		/// </summary>
+		public virtual ZoneGeometryChooser ZonesGeometry { get { return new ZoneGeometryChooser(this); } }
 		
 		const string TreeMapPackage = "treemap.mpk";
 		const string TreeMapFile = "treemap.csv";

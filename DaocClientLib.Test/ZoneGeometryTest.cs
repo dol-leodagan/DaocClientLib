@@ -61,7 +61,7 @@ namespace DaocClientLib.Test
 		public void TestZoneGeometryWithNullSectorPack()
 		{
 			FileInfo[] test = null;
-			new ZoneGeometry(0, test);
+			new ZoneGeometry(0, test, ZoneType.Terrain);
 		}
 		/// <summary>
 		/// Test Constructor with empty File Array
@@ -70,7 +70,7 @@ namespace DaocClientLib.Test
 		[ExpectedException(typeof(ArgumentException))]
 		public void TestZoneGeometryWithMissingSectorPack()
 		{
-			new ZoneGeometry(0, new FileInfo[0]);
+			new ZoneGeometry(0, new FileInfo[0], ZoneType.Terrain);
 		}
 		/// <summary>
 		/// Test Constructor with missing Sector.dat Package (not zone...)
@@ -79,7 +79,7 @@ namespace DaocClientLib.Test
 		[ExpectedException(typeof(ArgumentException))]
 		public void TestZoneGeometryWithEmptySectorPack()
 		{
-			new ZoneGeometry(0, new FileInfo[] { new FileInfo(ClientDataWrapperTest.ValidMPKPath) } );
+			new ZoneGeometry(0, new FileInfo[] { new FileInfo(ClientDataWrapperTest.ValidMPKPath) }, ZoneType.Terrain);
 		}
 		
 		#endregion

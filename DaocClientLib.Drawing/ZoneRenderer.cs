@@ -27,33 +27,40 @@
 namespace DaocClientLib.Drawing
 {
 	using System;
-	
-	#if OpenTK
-	using OpenTK;
-	using Matrix = OpenTK.Matrix4;
-	#elif SharpDX
-	using SharpDX;
-	#elif MonoGame
-	using Microsoft.Xna.Framework;
-	#endif
-	using Niflib;
-	using Niflib.Extensions;
+	using System.IO;
+	using System.Collections.Generic;
 	
 	/// <summary>
-	/// ZoneDrawingExtensions Contains Method for Generating 3D Drawing Collections from Client Lib Zone Files
+	/// ZoneRenderer Build primitive 3D object From Zone Geometry Data
 	/// </summary>
-	public static class ZoneDrawingExtensions
+	public class ZoneRenderer : ZoneGeometry
 	{
-		public static Vector3 Test()
+		/// <summary>
+		/// Client Data Wrapper for Accessing Geometry Data
+		/// </summary>
+		protected ClientDataWrapper ClientWrapper { get; set; }
+		
+		/// <summary>
+		/// Default Constructor
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="files"></param>
+		/// <param name="type"></param>
+		/// <param name="wrapper"></param>
+		public ZoneRenderer(int id, IEnumerable<FileInfo> files, ZoneType type, ClientDataWrapper wrapper)
+			: base(id, files, type)
 		{
-			using (var stream = new System.IO.BinaryReader(new System.IO.MemoryStream(new byte[0])))
-			{
-				var nif = new NiFile(stream);
-			}
-			
-			var test = new ClientDataWrapper("");
-			
-			return new Vector3();
+			ClientWrapper = wrapper;
+		}
+		
+		/// <summary>
+		/// Add Nif Reference in Mesh Cache
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="nif"></param>
+		protected void AddNifMesh(int id, string nif)
+		{
+			var trees = ClientWrapper.TreeReplacement[nif];
 		}
 	}
 }

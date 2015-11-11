@@ -24,36 +24,34 @@
  * SOFTWARE.
  */
 
-namespace DaocClientLib.Drawing
+// Don't Compile Demo if in an Unsupported Configuration
+#if OpenTK || Debug
+
+namespace DaocClientLib.Demo
 {
 	using System;
 	
-	#if OpenTK
 	using OpenTK;
-	using Matrix = OpenTK.Matrix4;
-	#elif SharpDX
-	using SharpDX;
-	#elif MonoGame
-	using Microsoft.Xna.Framework;
-	#endif
-	using Niflib;
-	using Niflib.Extensions;
+	using SharpNav.Geometry;
 	
 	/// <summary>
-	/// ZoneDrawingExtensions Contains Method for Generating 3D Drawing Collections from Client Lib Zone Files
+	/// Description of ZoneObjModel.
 	/// </summary>
-	public static class ZoneDrawingExtensions
+	public class ZoneObjModel
 	{
-		public static Vector3 Test()
+		public ZoneObjModel(int zoneid)
 		{
-			using (var stream = new System.IO.BinaryReader(new System.IO.MemoryStream(new byte[0])))
-			{
-				var nif = new NiFile(stream);
-			}
-			
-			var test = new ClientDataWrapper("");
-			
-			return new Vector3();
+		}
+		
+		public Triangle3[] GetTriangles()
+		{
+			return new Triangle3[0];
+		}
+		
+		public Vector3[] GetNormals()
+		{
+			return new Vector3[0];
 		}
 	}
 }
+#endif

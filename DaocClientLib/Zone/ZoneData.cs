@@ -95,6 +95,10 @@ namespace DaocClientLib
 		/// Zone Proxy Zone (Default -1)
 		/// </summary>
 		public short ProxyZone { get; private set; }
+		/// <summary>
+		/// Is this Zone a Proxy Zone ?
+		/// </summary>
+		public bool IsProxyZone { get { return ProxyZone > -1; } }
 		
 		/// <summary>
 		/// Zone Data Object From header String and Dictionary of Var=Value

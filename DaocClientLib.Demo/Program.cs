@@ -44,8 +44,9 @@ namespace DaocClientLib.Demo
 		private static void Main(string[] args)
 		{
 			#if OpenTK || Debug
-			using (DemoWindow ex = new DemoWindow())
+			using (DemoWindow demo = new DemoWindow())
 			{
+				demo.Run();
 			}
 			#else
 			Console.WriteLine("DaocClientLib.Demo does not support this configuration of DaocClientLib.");

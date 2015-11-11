@@ -32,6 +32,17 @@ using System.IO;
 namespace DaocClientLib
 {
 	/// <summary>
+	/// Zone Type Enum
+	/// </summary>
+	public enum ZoneType
+	{
+		Terrain = 0,
+		Dungeon = 2,
+		City = 1,
+		InstancedDungeon = 4,
+	}
+	
+	/// <summary>
 	/// ZoneGeometry parse Client Geometry Data
 	/// </summary>
 	public class ZoneGeometry
@@ -421,12 +432,41 @@ namespace DaocClientLib
 		}
 		#endregion
 		
+		
+		#region type getter
+		/// <summary>
+		/// This Zone Detected Type
+		/// </summary>
+		public ZoneType ZoneType { get; protected set; }
+		
+		/// <summary>
+		/// Is this Zone a Terrain ?
+		/// </summary>
+		public bool IsTerrain
+		{
+			get { return ZoneType == ZoneType.Terrain; }
+		}
+		/// <summary>
+		/// Is this Zone a Dungeon ?
+		/// </summary>
+		public bool IsDungeon
+		{
+			get { return ZoneType == ZoneType.Dungeon || ZoneType == ZoneType.InstancedDungeon; }
+		}
+		/// <summary>
+		/// Is this Zone a City ?
+		/// </summary>
+		public bool IsCity
+		{
+			get { return ZoneType == ZoneType.City; }
+		}
+		#endregion
 		/// <summary>
 		/// Default Construtor Intialize Values with Sector.Dat
 		/// </summary>
 		/// <param name="id"></param>
 		/// <param name="files"></param>
-		public ZoneGeometry(int id, IEnumerable<FileInfo> files)
+		public ZoneGeometry(int id, IEnumerable<FileInfo> files, ZoneType type)
 		{
 			if (files == null)
 				throw new ArgumentNullException("files");
@@ -442,6 +482,9 @@ namespace DaocClientLib
 			{
 				throw new ArgumentException(string.Format("No usable sector.dat Found when building Zone ID: {0}", id), "files", e);
 			}
+			
+			// Assign Zone Type
+			ZoneType = type;
 			
 			// Read Terrain
 			IDictionary<string, string> terrain;
@@ -497,7 +540,7 @@ namespace DaocClientLib
 							string extend_negy;
 							string tesselation;
 							string name;
-							string type;
+							string rtype;
 							
 							short r_flow = river.TryGetValue("flow", out flow) ? short.Parse(flow) : (short)0;
 							int r_height = river.TryGetValue("height", out height) ? int.Parse(height) : -1;
@@ -512,7 +555,7 @@ namespace DaocClientLib
 							river.TryGetValue("texture", out texture);
 							river.TryGetValue("multitexture", out multitexture);
 							river.TryGetValue("name", out name);
-							river.TryGetValue("type", out type);
+							river.TryGetValue("type", out rtype);
 							
 							var banks = new List<Tuple<IEnumerable<short>, IEnumerable<short>>>();
 							for (int b = 0 ; b < r_bankpoints ; b++)
@@ -527,7 +570,7 @@ namespace DaocClientLib
 								banks.Add(new Tuple<IEnumerable<short>, IEnumerable<short>>(left.Split(',').Select(s => short.Parse(s)), right.Split(',').Select(s => short.Parse(s))));
 							}
 							
-							var riverGeo = new RiverGeometry(w, name, type, texture, multitexture, r_flow, r_height, r_color, r_extend_posx, r_extend_posy, r_extend_negx, r_extend_negy, r_tesselation, banks);
+							var riverGeo = new RiverGeometry(w, name, rtype, texture, multitexture, r_flow, r_height, r_color, r_extend_posx, r_extend_posy, r_extend_negx, r_extend_negy, r_tesselation, banks);
 							rivers.Add(riverGeo);
 						}
 					}

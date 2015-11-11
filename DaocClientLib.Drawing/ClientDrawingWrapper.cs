@@ -24,60 +24,57 @@
  * SOFTWARE.
  */
 
-using System;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-
-namespace DaocClientLib
+namespace DaocClientLib.Drawing
 {
+	using System;
+	using System.IO;
+	
 	/// <summary>
-	/// ZoneGeometryChooser indexes all Zones Geometry Data
+	/// ClientDrawingWrapper is a ClientDataWrapper sub class implementing Drawing Primitives
 	/// </summary>
-	public class ZoneGeometryChooser
+	public class ClientDrawingWrapper : ClientDataWrapper
 	{
 		/// <summary>
-		/// Zone Suffix Regex
+		/// Retrieve Indexed Zone Renderer
 		/// </summary>
-		public const string ZoneRegEx =  @"\d{1,3}$";
-		/// <summary>
-		/// Zone Prefix
-		/// </summary>
-		public const string ZonePrefix =  "zone";
-		/// <summary>
-		/// Zone Directories indexed by ID
-		/// </summary>
-		protected readonly Dictionary<int, FileInfo[]> m_zoneDict;
+		public virtual ZoneRendererChooser ZonesRenderer { get { return new ZoneRendererChooser(this); } }
 		
 		/// <summary>
-		/// Zone Type indexed by ID
+		/// Create a Client Drawing Wrapper from Directory Path
 		/// </summary>
-		protected readonly Dictionary<int, ZoneType> m_zoneTypeDict;
-		
-		/// <summary>
-		/// Get Geometry Data From Zone Index
-		/// </summary>
-		public virtual ZoneGeometry this[int Index]
+		/// <param name="path"></param>
+		public ClientDrawingWrapper(string path)
+			: this(new DirectoryInfo(path))
 		{
-			get
-			{
-				FileInfo[] files;
-				ZoneType type;
-				if (m_zoneTypeDict.TryGetValue(Index, out type))
-					return m_zoneDict.TryGetValue(Index, out files) ? new ZoneGeometry(Index, files, type) : null;
-				
-				return null;
-			}
+		}
+
+		/// <summary>
+		/// Create a Client Drawing Wrapper from Directory Path and given Regex File Filters
+		/// </summary>
+		/// <param name="path"></param>
+		/// <param name="filters"></param>
+		public ClientDrawingWrapper(string path, string[] filters)
+			: this(new DirectoryInfo(path), filters)
+		{
 		}
 		
-		public ZoneGeometryChooser(ClientDataWrapper client)
+		/// <summary>
+		/// Create a Client Drawing Wrapper from Directory Path
+		/// </summary>
+		/// <param name="path"></param>
+		public ClientDrawingWrapper(DirectoryInfo path)
+			: this(path, null)
 		{
-			m_zoneDict = client.ClientFiles.Where(f => Regex.IsMatch(f.Directory.Name, string.Format("{0}{1}", ZonePrefix, ZoneRegEx), RegexOptions.IgnoreCase))
-				.GroupBy(f => f.Directory.Name)
-				.ToDictionary(k => Convert.ToInt32(new string(k.Key.Skip(ZonePrefix.Length).ToArray())), k => k.ToArray());
-			
-			m_zoneTypeDict = client.ZonesData.ToDictionary(k => (int)k.ID, v => (ZoneType)v.Type);
+		}
+		
+		/// <summary>
+		/// Create a Client Drawing Wrapper from Directory Path and given Regex File Filters
+		/// </summary>
+		/// <param name="path"></param>
+		/// <param name="filters"></param>
+		public ClientDrawingWrapper(DirectoryInfo path, string[] filters)
+			: base(path, filters)
+		{
 		}
 	}
 }

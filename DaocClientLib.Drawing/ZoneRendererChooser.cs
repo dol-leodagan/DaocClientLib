@@ -24,60 +24,54 @@
  * SOFTWARE.
  */
 
-using System;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-
-namespace DaocClientLib
+namespace DaocClientLib.Drawing
 {
+	using System;
+	using System.IO;
+	
 	/// <summary>
-	/// ZoneGeometryChooser indexes all Zones Geometry Data
+	/// ZoneRendererChooser indexes all Zones Renderer Data
 	/// </summary>
-	public class ZoneGeometryChooser
+	public class ZoneRendererChooser : ZoneGeometryChooser
 	{
 		/// <summary>
-		/// Zone Suffix Regex
+		/// Client Data Wrapper for Accessing Geometry Data
 		/// </summary>
-		public const string ZoneRegEx =  @"\d{1,3}$";
-		/// <summary>
-		/// Zone Prefix
-		/// </summary>
-		public const string ZonePrefix =  "zone";
-		/// <summary>
-		/// Zone Directories indexed by ID
-		/// </summary>
-		protected readonly Dictionary<int, FileInfo[]> m_zoneDict;
-		
-		/// <summary>
-		/// Zone Type indexed by ID
-		/// </summary>
-		protected readonly Dictionary<int, ZoneType> m_zoneTypeDict;
-		
-		/// <summary>
-		/// Get Geometry Data From Zone Index
-		/// </summary>
-		public virtual ZoneGeometry this[int Index]
+		protected ClientDataWrapper ClientWrapper { get; set; }
+
+		public new ZoneRenderer this[int Index]
 		{
 			get
 			{
 				FileInfo[] files;
 				ZoneType type;
 				if (m_zoneTypeDict.TryGetValue(Index, out type))
-					return m_zoneDict.TryGetValue(Index, out files) ? new ZoneGeometry(Index, files, type) : null;
+				{
+					if (m_zoneDict.TryGetValue(Index, out files))
+					{
+						switch(type)
+						{
+							default:
+							case ZoneType.Terrain:
+								return new TerrainRenderer(Index, files, type, ClientWrapper);
+							case ZoneType.City:
+								return new CityRenderer(Index, files, type, ClientWrapper);
+							case ZoneType.Dungeon:
+							case ZoneType.InstancedDungeon:
+								return new DungeonRenderer(Index, files, type, ClientWrapper);
+								
+								
+						}
+					}
+				}
 				
 				return null;
 			}
 		}
-		
-		public ZoneGeometryChooser(ClientDataWrapper client)
+		public ZoneRendererChooser(ClientDataWrapper client)
+			: base(client)
 		{
-			m_zoneDict = client.ClientFiles.Where(f => Regex.IsMatch(f.Directory.Name, string.Format("{0}{1}", ZonePrefix, ZoneRegEx), RegexOptions.IgnoreCase))
-				.GroupBy(f => f.Directory.Name)
-				.ToDictionary(k => Convert.ToInt32(new string(k.Key.Skip(ZonePrefix.Length).ToArray())), k => k.ToArray());
-			
-			m_zoneTypeDict = client.ZonesData.ToDictionary(k => (int)k.ID, v => (ZoneType)v.Type);
+			ClientWrapper = client;
 		}
 	}
 }
