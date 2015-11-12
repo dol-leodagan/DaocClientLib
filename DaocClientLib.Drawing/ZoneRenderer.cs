@@ -29,6 +29,9 @@ namespace DaocClientLib.Drawing
 	using System;
 	using System.IO;
 	using System.Collections.Generic;
+	using System.Linq;
+	
+	using Niflib;
 	
 	/// <summary>
 	/// ZoneRenderer Build primitive 3D object From Zone Geometry Data
@@ -39,6 +42,11 @@ namespace DaocClientLib.Drawing
 		/// Client Data Wrapper for Accessing Geometry Data
 		/// </summary>
 		protected ClientDataWrapper ClientWrapper { get; set; }
+		
+		/// <summary>
+		/// Nif Primitives Cache
+		/// </summary>
+		protected Dictionary<int, object> NifCache { get; set; }
 		
 		/// <summary>
 		/// Default Constructor
@@ -61,6 +69,22 @@ namespace DaocClientLib.Drawing
 		protected void AddNifMesh(int id, string nif)
 		{
 			var trees = ClientWrapper.TreeReplacement[nif];
+			
+			// Tree match
+			if (trees.Length > 0)
+			{
+				foreach (var tree in trees)
+				{
+					var treeNif = ClientWrapper.SearchRawFileOrPackaged(tree.RealNif, new []{ string.Empty, ".npk", ".mpk"});
+					using (var stream = new MemoryStream(treeNif))
+					{
+						using (var bs = new BinaryReader(stream))
+						{
+							var niFile = new NiFile(bs);
+						}
+					}
+				}
+			}
 		}
 	}
 }

@@ -103,10 +103,34 @@ namespace DaocClientLib
 			if (pack == null)
 				throw new FileNotFoundException("Package could not be found !", packageName);
 			
-			var result = new TinyMPK(pack.FullName)[fileName];
+			var result = new TinyMPK(pack)[fileName];
 			
 			if (result == null)
 				throw new FileNotFoundException(string.Format("File could not be found in package {0} !", packageName), fileName);
+			
+			return result.Data;
+		}
+		
+		/// <summary>
+		/// Extract a File from given MPK package 
+		/// </summary>
+		/// <param name="data"></param>
+		/// <param name="fileName"></param>
+		/// <returns>File Byte Array</returns>
+		public static byte[] GetFileDataFromPackage(this FileInfo data, string fileName)
+		{
+			if (data == null)
+				throw new ArgumentNullException("data");
+			if (string.IsNullOrEmpty(fileName))
+				throw new ArgumentNullException("fileName");
+						
+			if (!data.Exists)
+				throw new FileNotFoundException("Package could not be found !", data.FullName);
+			
+			var result = new TinyMPK(data)[fileName];
+			
+			if (result == null)
+				throw new FileNotFoundException(string.Format("File could not be found in package {0} !", data.FullName), fileName);
 			
 			return result.Data;
 		}
@@ -129,7 +153,7 @@ namespace DaocClientLib
 			if(pack == null)
 				throw new FileNotFoundException("Package could not be found !", packageName);
 			
-			return new TinyMPK(pack.FullName).ToDictionary(k => k.Key, v => v.Value.Data);
+			return new TinyMPK(pack).ToDictionary(k => k.Key, v => v.Value.Data);
 		}
 	}
 }

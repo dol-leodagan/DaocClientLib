@@ -29,6 +29,8 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
+using DaocClientLib.MPK;
+
 namespace DaocClientLib
 {
 	/// <summary>
@@ -163,6 +165,66 @@ namespace DaocClientLib
 		/// Retrieve Hard coded /Jump Points
 		/// </summary>
 		public virtual JumpPoint[] JumpPoints { get { return m_clientFiles.GetFileDataFromPackage(JumpPointsPackage, JumpPointsFile).ReadCSVFile().Select(line => new JumpPoint(line)).ToArray(); } }
+		#endregion
+		
+		#region files accessors
+		/// <summary>
+		/// Try to Retrieve File resources from arbitrary name 
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="packageExt"></param>
+		/// <param name="fileExt"></param>
+		/// <returns>byte array file or null if not found</returns>
+		public byte[] SearchRawFileOrPackaged(string name, string[] packageExt, string[] fileExt)
+		{
+			var file = m_clientFiles.FirstOrDefault(f => f.Name.Substring(0, f.Name.Length - f.Extension.Length).Equals(name, StringComparison.OrdinalIgnoreCase) && fileExt.Any(ext => ext.Equals(f.Extension, StringComparison.OrdinalIgnoreCase)));
+			// Found as Raw File
+			if (file != null)
+				return File.ReadAllBytes(file.FullName);
+			
+			var packages = m_clientFiles.Where(f => f.Name.Substring(0, f.Name.Length - f.Extension.Length).Equals(name, StringComparison.OrdinalIgnoreCase) && packageExt.Any(ext => ext.Equals(f.Extension, StringComparison.OrdinalIgnoreCase)));
+			// Found as Packaged File
+			foreach (var package in packages)
+			{
+				var mpk = new TinyMPK(package);
+				var mpkfile = mpk.Select(kv => kv.Key).FirstOrDefault(ent => fileExt.Any(ext => string.Format("{0}{1}", name, ext).Equals(ent, StringComparison.OrdinalIgnoreCase)));
+				if (mpkfile != null)
+					return mpk[mpkfile].Data;
+			}
+			
+			return null;
+		}
+		
+		/// <summary>
+		/// Try to Retrieve File resources from arbitrary name 
+		/// </summary>
+		/// <param name="nameExt"></param>
+		/// <param name="packageExt"></param>
+		/// <returns>byte array file or null if not found</returns>
+		public byte[] SearchRawFileOrPackaged(string nameExt, string[] packageExt)
+		{
+			var file = m_clientFiles.FirstOrDefault(f => f.Name.Equals(nameExt, StringComparison.OrdinalIgnoreCase));
+			// Found as Raw File
+			if (file != null)
+				return File.ReadAllBytes(file.FullName);
+			
+			// Search package with file name only
+			var nameInfo = new FileInfo(nameExt);
+			var name = nameInfo.Name.Substring(0, nameInfo.Name.Length - nameInfo.Extension.Length);
+			
+			var packages = m_clientFiles.Where(f => f.Name.Substring(0, f.Name.Length - f.Extension.Length).Equals(name, StringComparison.OrdinalIgnoreCase) && packageExt.Any(ext => ext.Equals(f.Extension, StringComparison.OrdinalIgnoreCase)));
+			// Found as Packaged File
+			foreach (var package in packages)
+			{
+				var mpk = new TinyMPK(package);
+				var mpkfile = mpk.Select(kv => kv.Key).FirstOrDefault(ent => nameExt.Equals(ent, StringComparison.OrdinalIgnoreCase));
+				if (mpkfile != null)
+					return mpk[mpkfile].Data;
+			}
+			
+			return null;
+		}
+		
 		#endregion
 	}
 }
