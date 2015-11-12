@@ -38,6 +38,8 @@ namespace DaocClientLib.Drawing
 		public DungeonRenderer(int id, IEnumerable<FileInfo> files, ZoneType type, ClientDataWrapper wrapper)
 			: base(id, files, type, wrapper)
 		{
+			for (int i = 0 ; i < DungeonChunk.Length ; i++)
+				AddNifMesh(i, DungeonChunk[i]);
 		}
 	}
 }

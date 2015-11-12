@@ -32,6 +32,7 @@ namespace DaocClientLib.Drawing
 	using System.Linq;
 	
 	using Niflib;
+	using Niflib.Extensions;
 	
 	/// <summary>
 	/// ZoneRenderer Build primitive 3D object From Zone Geometry Data
@@ -46,7 +47,24 @@ namespace DaocClientLib.Drawing
 		/// <summary>
 		/// Nif Primitives Cache
 		/// </summary>
-		protected Dictionary<int, object> NifCache { get; set; }
+		protected IDictionary<int, IDictionary<string, TriangleCollection>> NifCache { get; set; }
+		
+		/// <summary>
+		/// Layers Categories to Retrieve From Nif Objects
+		/// </summary>
+		protected virtual IDictionary<string, string[]> Layers
+		{
+			get 
+			{
+				return new Dictionary<string, string[]>() {
+					{ "pickee", new []{ "pickee", "collidee", "visible", "exterior", } },
+					{ "collidee", new []{ "collidee", "visible", "exterior", } },
+					{ "visible", new []{ "visible", "exterior", } },
+					{ "climb", new []{ "climb[0-9]{3}", } },
+					{ "door", new []{ "door[0-9]{3}", } },
+				};
+			}
+		}
 		
 		/// <summary>
 		/// Default Constructor
@@ -70,21 +88,43 @@ namespace DaocClientLib.Drawing
 		{
 			var trees = ClientWrapper.TreeReplacement[nif];
 			
-			// Tree match
+			var nifName = nif;
+			// Tree match, replace nif name
 			if (trees.Length > 0)
 			{
-				foreach (var tree in trees)
+				nifName = trees.First().RealNif;
+			}
+			
+			var mesh = GetNifMeshesFromName(nif);
+		}
+		
+		protected IDictionary<string, TriangleCollection> GetNifMeshesFromName(string nifname)
+		{
+			// Get File Bytes
+			var bytes = ClientWrapper.SearchRawFileOrPackaged(nifname, new []{ ".npk", ".mpk" });
+			
+			if (bytes != null)
+			{
+				using (var stream = new MemoryStream(bytes))
 				{
-					var treeNif = ClientWrapper.SearchRawFileOrPackaged(tree.RealNif, new []{ string.Empty, ".npk", ".mpk"});
-					using (var stream = new MemoryStream(treeNif))
+					using (var reader = new BinaryReader(stream))
 					{
-						using (var bs = new BinaryReader(stream))
+						var nif = new NiFile(reader);
+						foreach (var layers in Layers)
 						{
-							var niFile = new NiFile(bs);
+							TriangleCollection tris = new TriangleCollection();
+							foreach (var layer in layers.Value)
+							{
+								var result = nif.GetTriangleFromCategories(layer);
+								if (result.TryGetValue(layer, out tris))
+									break;
+							}
 						}
 					}
 				}
 			}
+			
+			return null;
 		}
 	}
 }

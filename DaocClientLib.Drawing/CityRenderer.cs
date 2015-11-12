@@ -38,6 +38,8 @@ namespace DaocClientLib.Drawing
 		public CityRenderer(int id, IEnumerable<FileInfo> files, ZoneType type, ClientDataWrapper wrapper)
 			: base(id, files, type, wrapper)
 		{
+			foreach(var nif in CityNifs)
+				AddNifMesh(nif.Key, nif.Value);
 		}
 	}
 }
