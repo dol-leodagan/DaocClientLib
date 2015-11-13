@@ -115,7 +115,7 @@ namespace DaocClientLib
 				throw new NotSupportedException(string.Format("game.dll could not be found, make sure directory {0} is a client setup !", path.FullName));
 			
 			// Filter All files recursively against Regex strings
-			m_clientFiles = path.GetFiles("*", SearchOption.AllDirectories)
+			m_clientFiles = path.EnumerateFiles("*", SearchOption.AllDirectories)
 				.Where(f => m_fileFilters.Any(r => Regex.IsMatch(f.Name, r))).ToArray();
 		}
 		

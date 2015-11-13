@@ -33,6 +33,15 @@ namespace DaocClientLib.Drawing
 	
 	using Niflib;
 	using Niflib.Extensions;
+	#if OpenTK
+	using OpenTK;
+	using Matrix = OpenTK.Matrix4;
+	#elif SharpDX
+	using SharpDX;
+	#elif MonoGame
+	using Microsoft.Xna.Framework;
+	#endif
+
 	
 	/// <summary>
 	/// ZoneRenderer Build primitive 3D object From Zone Geometry Data
@@ -95,11 +104,18 @@ namespace DaocClientLib.Drawing
 				nifName = trees.First().RealNif;
 			}
 			
-			var mesh = GetNifMeshesFromName(nif);
+			// Store Layered Nif in Cache
+			NifCache.Add(id, GetNifMeshesFromName(nif));
 		}
 		
+		/// <summary>
+		/// Search Nif File Name through all Client Files and extract Primitives Layers needed for displaying
+		/// </summary>
+		/// <param name="nifname"></param>
+		/// <returns></returns>
 		protected IDictionary<string, TriangleCollection> GetNifMeshesFromName(string nifname)
 		{
+			var result = new Dictionary<string, TriangleCollection>();
 			// Get File Bytes
 			var bytes = ClientWrapper.SearchRawFileOrPackaged(nifname, new []{ ".npk", ".mpk" });
 			
@@ -110,21 +126,49 @@ namespace DaocClientLib.Drawing
 					using (var reader = new BinaryReader(stream))
 					{
 						var nif = new NiFile(reader);
+						// Extract each Layer Type
 						foreach (var layers in Layers)
 						{
-							TriangleCollection tris = new TriangleCollection();
+							TriangleCollection tris = new TriangleCollection { Vertices = new Vector3[0], Indices = new TriangleIndex[0] };
+							// Try to find the requested Layer or iterate for alternate layer
 							foreach (var layer in layers.Value)
 							{
-								var result = nif.GetTriangleFromCategories(layer);
-								if (result.TryGetValue(layer, out tris))
+								var nifLayer = nif.GetTriangleFromCategories(layer);
+								// if we have any result, concat triangle collection and break from loop
+								if (nifLayer.Count > 0)
+								{
+									tris = nifLayer.Select(kv => kv.Value).Aggregate(new TriangleCollection { Vertices = new Vector3[0], Indices = new TriangleIndex[0] },
+									                                                 (t1, t2) =>
+									                                                 {
+									                                                 	TriangleCollection concat;
+									                                                 	TriangleWalker.Concat(ref t1, ref t2, out concat);
+									                                                 	return concat;
+									                                                 });
 									break;
+								}
+							}
+							
+							// Concat Triangle to Existing Nif Layers or add to result
+							if (tris.Indices.Length > 0)
+							{
+								TriangleCollection existing;
+								if (result.TryGetValue(layers.Key, out existing))
+								{
+									TriangleCollection concat;
+									TriangleWalker.Concat(ref existing, ref tris, out concat);
+									result[layers.Key] = concat;
+								}
+								else
+								{
+									result.Add(layers.Key, tris);
+								}
 							}
 						}
 					}
 				}
 			}
 			
-			return null;
+			return result;
 		}
 	}
 }
