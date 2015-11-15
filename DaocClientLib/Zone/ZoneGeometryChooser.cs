@@ -40,7 +40,7 @@ namespace DaocClientLib
 		/// <summary>
 		/// Zone Suffix Regex
 		/// </summary>
-		public const string ZoneRegEx =  @"\d{1,3}$";
+		public const string ZoneRegEx =  @"\d{1,3}";
 		/// <summary>
 		/// Zone Prefix
 		/// </summary>
@@ -73,7 +73,7 @@ namespace DaocClientLib
 		
 		public ZoneGeometryChooser(ClientDataWrapper client)
 		{
-			m_zoneDict = client.ClientFiles.Where(f => Regex.IsMatch(f.Directory.Name, string.Format("{0}{1}", ZonePrefix, ZoneRegEx), RegexOptions.IgnoreCase))
+			m_zoneDict = client.ClientFiles.Where(f => Regex.IsMatch(f.Directory.Name, string.Format("^{0}{1}$", ZonePrefix, ZoneRegEx), RegexOptions.IgnoreCase))
 				.GroupBy(f => f.Directory.Name)
 				.ToDictionary(k => Convert.ToInt32(new string(k.Key.Skip(ZonePrefix.Length).ToArray())), k => k.ToArray());
 			

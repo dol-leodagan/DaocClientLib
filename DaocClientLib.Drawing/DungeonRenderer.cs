@@ -27,6 +27,7 @@
 namespace DaocClientLib.Drawing
 {
 	using System;
+	using System.Linq;
 	using System.IO;
 	using System.Collections.Generic;
 
@@ -38,8 +39,8 @@ namespace DaocClientLib.Drawing
 		public DungeonRenderer(int id, IEnumerable<FileInfo> files, ZoneType type, ClientDataWrapper wrapper)
 			: base(id, files, type, wrapper)
 		{
-			for (int i = 0 ; i < DungeonChunk.Length ; i++)
-				AddNifMesh(i, DungeonChunk[i]);
+			AddNifCache(DungeonChunk.Select((s, i) => new KeyValuePair<int, string>(i, s)).ToDictionary(v => v.Key, v => v.Value));
+			AddNifInstancesYZSwapped(DungeonPlaces);
 		}
 	}
 }

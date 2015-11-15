@@ -34,6 +34,11 @@ namespace DaocClientLib
 	public sealed class NifGeometry
 	{
 		/// <summary>
+		/// Nif Reference Mesh ID
+		/// </summary>
+		public int MeshID { get; private set; }
+
+		/// <summary>
 		/// Nif Arbitrary ID
 		/// </summary>
 		public int ID { get; private set; }
@@ -96,8 +101,9 @@ namespace DaocClientLib
 		/// <summary>
 		/// Default Constructor
 		/// </summary>
-		public NifGeometry(int id, string file, string textual, float x, float y, float z, float scale, float angle, float rotationX, float rotationY, float rotationZ, bool flip, bool ground, NifGeometry relative)
+		public NifGeometry(int meshId, int id, string file, string textual, float x, float y, float z, float scale, float angle, float rotationX, float rotationY, float rotationZ, bool flip, bool ground, NifGeometry relative)
 		{
+			MeshID = meshId;
 			ID = id;
 			FileName = file;
 			TextualName = textual;

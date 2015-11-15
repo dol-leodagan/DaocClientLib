@@ -68,6 +68,7 @@ namespace DaocClientLib.Drawing
 				return null;
 			}
 		}
+		
 		public ZoneRendererChooser(ClientDataWrapper client)
 			: base(client)
 		{

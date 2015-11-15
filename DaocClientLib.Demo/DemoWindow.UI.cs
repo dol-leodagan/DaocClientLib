@@ -52,12 +52,14 @@ namespace DaocClientLib.Demo
 		private StatusBar statusBar;
 		
 		public ClientDrawingWrapper clientData;
+		public ZoneRendererChooser rendererChooser;
 		
 		private void LoadClient(object path)
 		{
 			try
 			{
 				clientData = new ClientDrawingWrapper(path.ToString());
+				rendererChooser = clientData.ZonesRenderer;
 			}
 			catch(Exception e)
 			{
@@ -207,7 +209,7 @@ namespace DaocClientLib.Demo
 			areaSetting.Dock = Pos.Top;
 			areaSetting.Height = 90;
 
-			var levelTris = _level != null ? _level.GetTriangles() : new [] { new Triangle3(new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0)) };
+			var levelTris = new [] { new Triangle3(new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0)) };
 			BBox3 bounds = TriangleEnumerable.FromTriangle(levelTris, 0, levelTris.Length).GetBoundingBox();
 
 			Base maxTriSlope = CreateSliderOption(areaSetting, "Max Tri Slope:", 0.0001f, 3.14f, 3.14f, "N2", leftMax, rightMax, v => areaSettings.MaxTriSlope = v);
@@ -218,9 +220,8 @@ namespace DaocClientLib.Demo
 				_levelId = (int)e.SelectedItem.UserData;
 				areaSetting.RemoveChild(minLevelHeight, true);
 				areaSetting.RemoveChild(maxLevelHeight, true);
-				levelTris = _level != null ? _level.GetTriangles() : new [] { new Triangle3(new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0)) };
-				bounds = TriangleEnumerable.FromTriangle(levelTris, 0, levelTris.Length).GetBoundingBox();
-	
+				bounds = _level != null ? _level.BoundingBox
+					: TriangleEnumerable.FromTriangle(new []{ new Triangle3 { A = new Vector3(0, 0, 0), B = new Vector3(0, 0, 0), C = new Vector3(0, 0, 0) } }, 0, 1).GetBoundingBox();	
 				minLevelHeight = CreateSliderOption(areaSetting, "Min Height:", bounds.Min.Y, bounds.Max.Y, bounds.Min.Y, "N0", leftMax, rightMax, v => areaSettings.MinLevelHeight = v);
 				maxLevelHeight = CreateSliderOption(areaSetting, "Max Height:", bounds.Min.Y, bounds.Max.Y, bounds.Max.Y, "N0", leftMax, rightMax, v => areaSettings.MaxLevelHeight = v);
 			};

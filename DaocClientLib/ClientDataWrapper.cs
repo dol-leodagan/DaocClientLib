@@ -51,7 +51,18 @@ namespace DaocClientLib
 		/// <summary>
 		/// File loading Filters. (Regex)
 		/// </summary>
-		public static string[] DefaultFilters { get { return new []{ @"camelot\.exe", @"game\.dll", @".+\.mpk|.+\.npk", @".+\.nif|.+\.nhd", @".+\.pcx|.+\.tga|.+\.bmp|.+\.dds", @".+\.csv" }; } }
+		public static string[] DefaultFilters { get { return new []{
+					@".+\.[mn]pk",
+					@".+\.nif",
+					@".+\.nhd",
+					@".+\.pcx",
+					@".+\.tga",
+					@".+\.bmp",
+					@".+\.dds",
+					@".+\.csv",
+					@"camelot\.exe",
+					@"game\.dll",
+				}; } }
 		
 		/// <summary>
 		/// Client Files Detected
@@ -116,7 +127,7 @@ namespace DaocClientLib
 			
 			// Filter All files recursively against Regex strings
 			m_clientFiles = path.EnumerateFiles("*", SearchOption.AllDirectories)
-				.Where(f => m_fileFilters.Any(r => Regex.IsMatch(f.Name, r))).ToArray();
+				.Where(f => m_fileFilters.Any(r => Regex.IsMatch(f.Name, string.Format("^{0}$", r), RegexOptions.IgnoreCase))).ToArray();
 		}
 		
 		#region global accessors

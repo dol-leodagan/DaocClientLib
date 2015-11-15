@@ -28,6 +28,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
+using System.Globalization;
 
 namespace DaocClientLib
 {
@@ -54,7 +55,7 @@ namespace DaocClientLib
 		/// <summary>
 		/// Game Unit to 3D Scape Factor
 		/// </summary>
-		public const float UnitFactor = TerrainFactor/65535f;
+		public const float UnitFactor = TerrainFactor/65536f;
 
 		/// <summary>
 		/// This Zone Files
@@ -63,7 +64,7 @@ namespace DaocClientLib
 		/// <summary>
 		/// This Zone DAT Package
 		/// </summary>
-		private string DatPackage { get { return string.Format("dat{0}", ID.ToString("000")); } }
+		private string DatPackage { get { return string.Format("dat{0}.mpk", ID.ToString("000")); } }
 		/// <summary>
 		/// This Zone Sector.dat File Name
 		/// </summary>
@@ -169,6 +170,18 @@ namespace DaocClientLib
 				}
 				
 				return map;
+			}
+		}
+		
+		/// <summary>
+		/// Get Heigh Calculator
+		/// </summary>
+		public TerrainHeightCalculator TerrainHeightCalculator
+		{
+			get
+			{					
+				var terrain = TerrainHeightMap;
+				return new TerrainHeightCalculator(terrain, UnitFactor);
 			}
 		}
 		
@@ -287,24 +300,24 @@ namespace DaocClientLib
 				return m_files.GetFileDataFromPackage(DatPackage, DungeonPlaceFile).ReadCSVFile()
 					.Select(line =>
 					        {
-					        	index++;
 					        	if (line.Length < 8)
 					        		return null;
-					        	
+
+					        	index++;					        	
 					        	// Chunk Nif Reference
 					        	int nifId = int.Parse(line.First());
 					        	string nifName = chunks[nifId];
 					        	
-					        	float X = float.Parse(line[1]);
-					        	float Y = float.Parse(line[2]);
-					        	float Z = float.Parse(line[3]);
+					        	float X = float.Parse(line[1], CultureInfo.InvariantCulture);
+					        	float Y = float.Parse(line[2], CultureInfo.InvariantCulture);
+					        	float Z = float.Parse(line[3], CultureInfo.InvariantCulture);
 					        	
-					        	float Angle = float.Parse(line[4]);
-					        	float RotX = float.Parse(line[5]);
-					        	float RotY = float.Parse(line[6]);
-					        	float RotZ = float.Parse(line[7]);
+					        	float Angle = float.Parse(line[4], CultureInfo.InvariantCulture);
+					        	float RotX = float.Parse(line[5], CultureInfo.InvariantCulture);
+					        	float RotY = float.Parse(line[6], CultureInfo.InvariantCulture);
+					        	float RotZ = float.Parse(line[7], CultureInfo.InvariantCulture);
 					        	
-					        	return new NifGeometry(index, nifName, nifName, X, Y, Z, 1f, Angle, RotX, RotY, RotZ, false, false, null);
+					        	return new NifGeometry(nifId, index, nifName, nifName, X, Y, Z, 1f, Angle, RotX, RotY, RotZ, false, false, null);
 					        }
 					       ).Where(nif => nif != null).ToArray();
 			}
@@ -323,10 +336,10 @@ namespace DaocClientLib
 				return m_files.GetFileDataFromPackage(DatPackage, DungeonPropFile).ReadCSVFile()
 					.Select(line =>
 					        {
-					        	index++;
 					        	if (line.Length < 11)
 					        		return null;
 					        	
+					        	index++;					        	
 					        	// Chunk nif Reference
 					        	int nifId = int.Parse(line.First());
 					        	string nifName = chunks[nifId];
@@ -335,18 +348,18 @@ namespace DaocClientLib
 					        	int placeId = int.Parse(line[9]);
 					        	var place = places.FirstOrDefault(nif => nif.ID == placeId);
 					        	
-					        	float X = float.Parse(line[1]);
-					        	float Y = float.Parse(line[2]);
-					        	float Z = float.Parse(line[3]);
+					        	float X = float.Parse(line[1], CultureInfo.InvariantCulture);
+					        	float Y = float.Parse(line[2], CultureInfo.InvariantCulture);
+					        	float Z = float.Parse(line[3], CultureInfo.InvariantCulture);
 					        	
-					        	float Angle = float.Parse(line[4]);
-					        	float RotX = float.Parse(line[5]);
-					        	float RotY = float.Parse(line[6]);
-					        	float RotZ = float.Parse(line[7]);
+					        	float Angle = float.Parse(line[4], CultureInfo.InvariantCulture);
+					        	float RotX = float.Parse(line[5], CultureInfo.InvariantCulture);
+					        	float RotY = float.Parse(line[6], CultureInfo.InvariantCulture);
+					        	float RotZ = float.Parse(line[7], CultureInfo.InvariantCulture);
 					        	
 					        	float Scale = float.Parse(line[10]);
 					        	
-					        	return new NifGeometry(index, nifName, nifName, X, Y, Z, Scale, Angle, RotX, RotY, RotZ, false, false, place);
+					        	return new NifGeometry(nifId, index, nifName, nifName, X, Y, Z, Scale, Angle, RotX, RotY, RotZ, false, false, place);
 					        }).Where(nif => nif != null).ToArray();
 			}
 		}
@@ -383,18 +396,19 @@ namespace DaocClientLib
 				return m_files.GetFileDataFromPackage(DatPackage, TerrainFixtureFile).ReadCSVFile()
 					.Select(line =>
 					        {
-					        	index++;
-					        	if (line.Length < 13 || (line.Length > 0 && line[0].StartsWith("Fixtures", StringComparison.OrdinalIgnoreCase)))
+					        	if (line.Length < 13 || (line.Length > 0 && (line[0].StartsWith("Fixtures", StringComparison.OrdinalIgnoreCase)
+					        	                                             || line[0].StartsWith("ID", StringComparison.OrdinalIgnoreCase))))
 					        		return null;
 					        	
+					        	index++;
 					        	string nifname;
 					        	int nifId = int.Parse(line[1]);
-					        	if (!TerrainNifs.TryGetValue(nifId, out nifname))
+					        	if (!nifs.TryGetValue(nifId, out nifname))
 					        		return null;
 					        	
-					        	float X = float.Parse(line[3]);
-					        	float Y = float.Parse(line[4]);
-					        	float Z = float.Parse(line[5]);
+					        	float X = float.Parse(line[3], CultureInfo.InvariantCulture);
+					        	float Y = float.Parse(line[4], CultureInfo.InvariantCulture);
+					        	float Z = float.Parse(line[5], CultureInfo.InvariantCulture);
 					        	int A = int.Parse(line[6]);
 					        	float Scale = int.Parse(line[7]) / 100f;
 					        	bool ground = int.Parse(line[11]) > 0;
@@ -406,14 +420,14 @@ namespace DaocClientLib
 					        	// Long Version
 					        	if (line.Length > 18)
 					        	{
-						        	Angle = float.Parse(line[15]);
-						        	RotX = float.Parse(line[16]);
-						        	RotY = float.Parse(line[17]);
-						        	RotZ = float.Parse(line[18]);
+						        	Angle = float.Parse(line[15], CultureInfo.InvariantCulture);
+						        	RotX = float.Parse(line[16], CultureInfo.InvariantCulture);
+						        	RotY = float.Parse(line[17], CultureInfo.InvariantCulture);
+						        	RotZ = float.Parse(line[18], CultureInfo.InvariantCulture);
 					        	}
 					        	
 					        	// TODO angle / A ?? Z ??
-					        	return new NifGeometry(index, nifname, line[2], X, Y, Z, Scale, Angle, RotX, RotY, RotZ, flip, ground, null);
+					        	return new NifGeometry(nifId, index, nifname, line[2], X, Y, Z, Scale, Angle, RotX, RotY, RotZ, flip, ground, null);
 					        }).Where(nif => nif != null).ToArray();
 			}
 		}
@@ -426,7 +440,7 @@ namespace DaocClientLib
 			get
 			{
 				return m_files.GetFileDataFromPackage(DatPackage, CityFile).ReadCSVFile()
-					.Where(line => line.Length > 1).Select(line => new KeyValuePair<int, string>(int.Parse(line[0]), line[1]))
+					.Where(line => line.Length > 1 && !string.IsNullOrEmpty(line[1])).Select(line => new KeyValuePair<int, string>(int.Parse(line[0]), line[1]))
 					.ToDictionary(kv => kv.Key, kv => kv.Value);
 			}
 		}

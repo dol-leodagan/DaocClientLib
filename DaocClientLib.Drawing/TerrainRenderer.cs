@@ -28,18 +28,97 @@ namespace DaocClientLib.Drawing
 {
 	using System;
 	using System.IO;
+	using System.Linq;
 	using System.Collections.Generic;
+	
+	using Niflib.Extensions;
 
+	#if OpenTK
+	using OpenTK;
+	using Matrix = OpenTK.Matrix4;
+	#elif SharpDX
+	using SharpDX;
+	#elif MonoGame
+	using Microsoft.Xna.Framework;
+	#endif
+	
 	/// <summary>
 	/// Zone Renderer For Terrain Type
 	/// </summary>
 	public class TerrainRenderer : ZoneRenderer
-	{
+	{		
 		public TerrainRenderer(int id, IEnumerable<FileInfo> files, ZoneType type, ClientDataWrapper wrapper)
 			: base(id, files, type, wrapper)
 		{
-			foreach(var nif in TerrainNifs)
-				AddNifMesh(nif.Key, nif.Value);
+			// Init Terrain Height Calculator
+			TerrainHeightCache = TerrainHeightCalculator;
+			
+			AddNifCache(TerrainNifs);
+			AddNifInstancesYZSwapped(TerrainFixtures);
+			
+			// Store Terrain
+			var terrain = TerrainHeightMap;
+			var vertices = new List<Vector3>();
+			var indices = new List<TriangleIndex>();
+			for (int x = 0 ; x < terrain.Length ; x++)
+			{
+				var yLength = terrain[x].Length;
+				for (int y = 0 ; y < yLength ; y++)
+				{
+					var height = terrain[x][y];
+					vertices.Add(new Vector3(x, height, y));
+				}
+			}
+			
+			var width = terrain.Length;
+			for (int x = 0 ; x < terrain.Length - 1 ; x++)
+			{
+				var yLength = terrain[x].Length;
+				for (int y = 0 ; y < yLength - 1 ; y++)
+				{
+					var tri1 = new TriangleIndex
+					{
+						A = (uint)((x + 1) * width + (y + 1)),
+						B = (uint)((x + 1) * width + y),
+						C = (uint)(x * width + y),
+					};
+					var tri2 = new TriangleIndex
+					{
+						A = (uint)((x + 1) * width + (y + 1)),
+						B = (uint)(x * width + y),
+						C = (uint)(x * width + (y + 1)),
+					};
+					
+					indices.Add(tri1);
+					indices.Add(tri2);
+				}
+			}
+			
+			// Build Terrain object as a Primitive Nif
+			var Terrain = new TriangleCollection
+			{
+				Vertices = vertices.ToArray(),
+				Indices = indices.ToArray(),
+			};
+			var TerrainNormals = Terrain.ComputeNormalLighting();
+			
+			var dictMesh = new Dictionary<string, TriangleCollection>();
+			var dictNorms = new Dictionary<string, Vector3[]>();
+			foreach (var layer in new []{ "pickee", "collidee", "visible", })
+			{
+				var layername = layer;
+				dictMesh.Add(layername, Terrain);
+				dictNorms.Add(layername, TerrainNormals);
+			}
+			
+			// Add Terrain like a Nif
+			var insertid = 0;
+			if (NifCache.Count > 0)
+				insertid = NifCache.Max(kv => kv.Key) + 1;
+			
+			NifCache.Add(insertid, dictMesh);
+			NifNormalsCache.Add(insertid, dictNorms);
+			InstancesMatrix = InstancesMatrix.Concat(new [] { new KeyValuePair<int, Matrix>(insertid, Matrix.Identity) }).ToArray();
 		}
 	}
 }

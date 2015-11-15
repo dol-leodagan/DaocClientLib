@@ -144,8 +144,6 @@ namespace DaocClientLib.Demo
 
 			InitializeOpenGL();
 
-			_level = new ZoneObjModel(363);
-			//_level = new ZoneObjModel(227);
 			if (_level != null) LoadLevel();
 			LoadDebugMeshes();
 
@@ -161,6 +159,13 @@ namespace DaocClientLib.Demo
 			gwenProjection = Matrix4.CreateOrthographicOffCenter(0, Width, Height, 0, -1, 1);
 
 			InitializeUI();
+			if (true && _level == null && clientData == null)
+			{
+				LoadClient(@"C:\Dark Age of Camelot1118L");
+				//_levelId = 221;
+				_levelId = 209;
+			}
+			
 		}
 
 		protected override void OnUpdateFrame(FrameEventArgs e)
@@ -290,16 +295,9 @@ namespace DaocClientLib.Demo
 
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-			if (displayLevel)
+			if (displayLevel && _level != null)
 			{
-				GL.Enable(EnableCap.Lighting);
-				GL.Enable(EnableCap.Light0);
-				GL.Light(LightName.Light0, LightParameter.Position, new Vector4(0.5f, 1, 0.5f, 0));
-
-				DrawLevel();
-
-				GL.Disable(EnableCap.Light0);
-				GL.Disable(EnableCap.Lighting);
+				_level.Draw();
 			}
 			
 			//DrawLevelOutline();
@@ -387,10 +385,11 @@ namespace DaocClientLib.Demo
 			try
 			{
 				//level.SetBoundingBoxOffset(new Vector3(settings.CellSize * 0.5f, settings.CellHeight * 0.5f, settings.CellSize * 0.5f));
-				var levelTris = _level.GetTriangles();
+				
+				var levelTris = _level.Triangles().ToArray();
 				var triEnumerable = TriangleEnumerable.FromTriangle(levelTris, 0, levelTris.Length);
 				BBox3 bounds = triEnumerable.GetBoundingBox();
-
+				
 				heightfield = new Heightfield(bounds, settings);
 
 				Console.WriteLine("Heightfield");
@@ -506,7 +505,7 @@ namespace DaocClientLib.Demo
 				l.Text = "Generation Time: " + sw.ElapsedMilliseconds + "ms";
 
 				Console.WriteLine("Navmesh generated successfully in " + sw.ElapsedMilliseconds + "ms.");
-				Console.WriteLine("Rasterized " + _level.GetTriangles().Length + " triangles.");
+				Console.WriteLine("Rasterized " + _level.TriangleCount + " triangles.");
 				Console.WriteLine("Generated " + contourSet.Count + " regions.");
 				Console.WriteLine("PolyMesh contains " + polyMesh.VertCount + " vertices in " + polyMesh.PolyCount + " polys.");
 				Console.WriteLine("PolyMeshDetail contains " + polyMeshDetail.VertCount + " vertices and " + polyMeshDetail.TrisCount + " tris in " + polyMeshDetail.MeshCount + " meshes.");

@@ -110,6 +110,10 @@
       <Project>{ADDA2F43-96C0-497F-8216-29C67ABC9806}</Project>
       <Name>Gwen</Name>
     </ProjectReference>
+    <ProjectReference Include="..\niflib.net\Niflib.csproj">
+      <Project>{EC36A004-E138-4E6A-BC73-021353BAED5A}</Project>
+      <Name>Niflib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

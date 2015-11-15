@@ -197,3 +197,5 @@ FakesAssemblies/
 packages
 OpenCover
 /Binaries
+/DaocClientLib.Demo/ProfilingSessions/*.sdps
+*.sdps

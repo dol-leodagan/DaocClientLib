@@ -81,6 +81,7 @@
     <Compile Include="TinyMPKFile.cs" />
     <Compile Include="Zone\NifGeometry.cs" />
     <Compile Include="Zone\RiverGeometry.cs" />
+    <Compile Include="Zone\TerrainHeightCalculator.cs" />
     <Compile Include="Zone\ZoneData.cs" />
     <Compile Include="Zone\ZoneDataList.cs" />
     <Compile Include="Zone\ZoneGeometry.cs" />
@@ -91,6 +92,12 @@
     <Folder Include="Craft" />
     <Folder Include="Tree" />
     <Folder Include="Zone" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ProfilingSessions\Session20151114_212404.sdps" />
+    <Content Include="ProfilingSessions\Session20151114_214309.sdps" />
+    <Content Include="ProfilingSessions\Session20151114_214813.sdps" />
+    <Content Include="ProfilingSessions\Session20151114_223938.sdps" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

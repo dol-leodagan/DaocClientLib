@@ -39,7 +39,7 @@ namespace DaocClientLib
 		/// <summary>
 		/// Zone Suffix Regex
 		/// </summary>
-		public const string ZoneRegEx =  @"\d{1,3}$";
+		public const string ZoneRegEx =  @"\d{1,3}";
 		/// <summary>
 		/// Zone Prefix
 		/// </summary>
@@ -66,7 +66,7 @@ namespace DaocClientLib
 		/// <param name="content"></param>
 		public ZoneDataList(IDictionary<string, IDictionary<string, string>> content)
 		{
-			Zones = content.Where(kv => Regex.IsMatch(kv.Key, string.Format("{0}{1}", ZonePrefix, ZoneRegEx), RegexOptions.IgnoreCase))
+			Zones = content.Where(kv => Regex.IsMatch(kv.Key, string.Format("^{0}{1}$", ZonePrefix, ZoneRegEx), RegexOptions.IgnoreCase))
 				.Select(kv => {
 				        	try
 				        	{

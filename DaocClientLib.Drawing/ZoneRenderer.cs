@@ -33,6 +33,7 @@ namespace DaocClientLib.Drawing
 	
 	using Niflib;
 	using Niflib.Extensions;
+	
 	#if OpenTK
 	using OpenTK;
 	using Matrix = OpenTK.Matrix4;
@@ -56,8 +57,40 @@ namespace DaocClientLib.Drawing
 		/// <summary>
 		/// Nif Primitives Cache
 		/// </summary>
-		protected IDictionary<int, IDictionary<string, TriangleCollection>> NifCache { get; set; }
+		public IDictionary<int, IDictionary<string, TriangleCollection>> NifCache { get; protected set; }
 		
+		/// <summary>
+		/// Nif Primitives Cache
+		/// </summary>
+		public IDictionary<int, IDictionary<string, Vector3[]>> NifNormalsCache { get; protected set; }
+		
+		/// <summary>
+		/// Nif Instances Matrix
+		/// Index Nif Cache Meshes with a World Instance Matrix
+		/// </summary>
+		public KeyValuePair<int, Matrix>[] InstancesMatrix { get; protected set; }
+		
+		/// <summary>
+		/// TreeReplacement Map Cache
+		/// </summary>
+		protected TreeReplacementMap TreeReplacement { get; set; }
+		
+		/// <summary>
+		/// TerrainHeightCalculatorCache
+		/// </summary>
+		protected TerrainHeightCalculator TerrainHeightCache { get; set; }
+		
+		/// <summary>
+		/// Matrix for Flipping Nif Left/Right Display
+		/// </summary>
+		protected static Matrix FlipMatrix = new Matrix
+		{
+			M11 = 1, M12 = 0, M13 = 0, M14 = 0,
+			M21 = 0, M22 = 0, M23 = 1, M24 = 0,
+			M31 = 0, M32 = 1, M33 = 0, M34 = 0,
+			M41 = 0, M42 = 0, M43 = 0, M44 = 1,
+		};
+
 		/// <summary>
 		/// Layers Categories to Retrieve From Nif Objects
 		/// </summary>
@@ -65,7 +98,7 @@ namespace DaocClientLib.Drawing
 		{
 			get 
 			{
-				return new Dictionary<string, string[]>() {
+				return new Dictionary<string, string[]> {
 					{ "pickee", new []{ "pickee", "collidee", "visible", "exterior", } },
 					{ "collidee", new []{ "collidee", "visible", "exterior", } },
 					{ "visible", new []{ "visible", "exterior", } },
@@ -85,7 +118,22 @@ namespace DaocClientLib.Drawing
 		public ZoneRenderer(int id, IEnumerable<FileInfo> files, ZoneType type, ClientDataWrapper wrapper)
 			: base(id, files, type)
 		{
-			ClientWrapper = wrapper;
+			TreeReplacement = wrapper.TreeReplacement;
+			NifCache = new Dictionary<int, IDictionary<string, TriangleCollection>>();
+			NifNormalsCache = new Dictionary<int, IDictionary<string, Vector3[]>>();
+			InstancesMatrix = new KeyValuePair<int, Matrix>[0];
+			ClientWrapper = wrapper;			
+		}
+		
+		/// <summary>
+		/// Init Nif Cache with a collection of Nifs References
+		/// </summary>
+		/// <param name="nifs"></param>
+		protected void AddNifCache(IDictionary<int, string> nifs)
+		{
+			// Store Nifs Meshes
+			foreach(var nif in nifs)
+				AddNifMesh(nif.Key, nif.Value);
 		}
 		
 		/// <summary>
@@ -95,7 +143,7 @@ namespace DaocClientLib.Drawing
 		/// <param name="nif"></param>
 		protected void AddNifMesh(int id, string nif)
 		{
-			var trees = ClientWrapper.TreeReplacement[nif];
+			var trees = TreeReplacement[nif];
 			
 			var nifName = nif;
 			// Tree match, replace nif name
@@ -105,7 +153,14 @@ namespace DaocClientLib.Drawing
 			}
 			
 			// Store Layered Nif in Cache
-			NifCache.Add(id, GetNifMeshesFromName(nif));
+			var meshes = GetNifMeshesFromName(nif);
+			NifCache.Add(id, meshes);
+			var meshNormals = new Dictionary<string, Vector3[]>();
+			foreach (var mesh in meshes)
+			{
+				meshNormals.Add(mesh.Key, mesh.Value.ComputeNormalLighting());
+			}
+			NifNormalsCache.Add(id, meshNormals);
 		}
 		
 		/// <summary>
@@ -133,7 +188,7 @@ namespace DaocClientLib.Drawing
 							// Try to find the requested Layer or iterate for alternate layer
 							foreach (var layer in layers.Value)
 							{
-								var nifLayer = nif.GetTriangleFromCategories(layer);
+								var nifLayer = nif.GetTriangleFromCategories(string.Format("^{0}$", layer));
 								// if we have any result, concat triangle collection and break from loop
 								if (nifLayer.Count > 0)
 								{
@@ -144,10 +199,12 @@ namespace DaocClientLib.Drawing
 									                                                 	TriangleWalker.Concat(ref t1, ref t2, out concat);
 									                                                 	return concat;
 									                                                 });
+									TriangleCollection rotated;
+									SwapYZTriangleCollection(ref tris, out rotated);
+									tris = rotated;
 									break;
 								}
 							}
-							
 							// Concat Triangle to Existing Nif Layers or add to result
 							if (tris.Indices.Length > 0)
 							{
@@ -170,5 +227,59 @@ namespace DaocClientLib.Drawing
 			
 			return result;
 		}
+		
+		/// <summary>
+		/// Add a Nif Geometry Object as an Instanced Mesh with World Matrix Computed
+		/// </summary>
+		/// <param name="geometry">Nif Geometry Description</param>
+		protected void AddNifInstancesYZSwapped(NifGeometry geometry)
+		{
+			AddNifInstancesYZSwapped(new []{geometry});
+		}
+		
+		/// <summary>
+		/// Add Each Nif Geometry as an Instanced Meshes with World Matrix computed
+		/// </summary>
+		/// <param name="geometries">Collection of Nif Geometry</param>
+		protected void AddNifInstancesYZSwapped(IEnumerable<NifGeometry> geometries)
+		{
+			var result = new List<KeyValuePair<int, Matrix>>();
+			foreach (var geometry in geometries)
+			{
+				var trees = TreeReplacement[geometry.FileName];
+				var nifMatrix = geometry.ComputeWorldMatrixYZSwapped(UnitFactor, TerrainHeightCache);
+				
+				// Tree match, Compose Matrix
+				if (trees.Length > 0)
+				{
+					foreach (var tree in trees)
+					{
+						var instance = tree.ComputeWorldMatrixYZSwapped(UnitFactor);
+						Matrix translate;
+						ZoneDrawingExtensions.Mult(ref nifMatrix, ref instance, out translate);
+						result.Add(new KeyValuePair<int, Matrix>(geometry.MeshID, translate));
+					}
+				}
+				else
+				{
+					// Use Nif Matrix
+					result.Add(new KeyValuePair<int, Matrix>(geometry.MeshID, nifMatrix));
+				}
+			}
+			
+			InstancesMatrix = InstancesMatrix.Concat(result).ToArray();
+		}
+		
+		protected void SwapYZTriangleCollection(ref TriangleCollection tris, out TriangleCollection result)
+		{
+			var mesh = tris;
+			var newVerts = mesh.Vertices.Select(v => { Vector3 res; Vector3.TransformVector(ref v, ref FlipMatrix, out res); return res; }).ToArray();
+			var newIndices = mesh.Indices.Select(tri => new TriangleIndex { A = tri.C, B = tri.B, C = tri.A}).ToArray();
+			result = new TriangleCollection
+			{
+				Vertices = newVerts,
+				Indices = newIndices,
+			};
+		}	
 	}
 }

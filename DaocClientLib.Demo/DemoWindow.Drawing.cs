@@ -43,9 +43,7 @@ namespace DaocClientLib.Demo
 
 	public partial class DemoWindow
 	{
-		private int levelVbo, levelNormVbo, heightfieldVoxelVbo, heightfieldVoxelIbo, squareVbo, squareIbo;
-		private int levelNumVerts;
-		private bool levelHasNorm;
+		private int heightfieldVoxelVbo, heightfieldVoxelIbo, squareVbo, squareIbo;
 
 		private ZoneObjModel _level;
 		private int _levelId
@@ -56,8 +54,8 @@ namespace DaocClientLib.Demo
 					UnloadLevel();
 				
 				try
-				{
-					_level = new ZoneObjModel(value);
+				{					
+					_level = new ZoneObjModel(rendererChooser[value]);
 				}
 				catch (Exception e)
 				{
@@ -154,32 +152,14 @@ namespace DaocClientLib.Demo
 
 		private void LoadLevel()
 		{
-			var levelTris = _level.GetTriangles();
-			var levelNorms = _level.GetNormals();
-			levelNumVerts = levelTris.Length * 3 * 3;
-			levelHasNorm = levelNorms != null && levelNorms.Length > 0;
-
 			zoom = MathHelper.PiOver4;
-			var bounds = TriangleEnumerable.FromTriangle(levelTris, 0, levelTris.Length).GetBoundingBox();
+			var bounds = _level.BoundingBox;
 			cam.Position = new Vector3(bounds.Max.X * 1.4f, bounds.Max.Y * 4f, bounds.Max.Z * 1.2f);
 			cam.RotateHeadingTo(-25);
 			cam.RotatePitchTo(315);
 
 			//TODO fix camera, it breaks with lookat...
 			//cam.LookAt(new Vector3(bounds.Center.X, bounds.Center.Y, bounds.Center.Z));
-
-			levelVbo = GL.GenBuffer();
-			GL.BindBuffer(BufferTarget.ArrayBuffer, levelVbo);
-			GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(levelNumVerts * 4), levelTris, BufferUsageHint.StaticDraw);
-			GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-
-			if (levelHasNorm)
-			{
-				levelNormVbo = GL.GenBuffer();
-				GL.BindBuffer(BufferTarget.ArrayBuffer, levelNormVbo);
-				GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(levelNorms.Length * 3 * 4), levelNorms, BufferUsageHint.StaticDraw);
-				GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-			}
 		}
 
 		private void LoadDebugMeshes()
@@ -207,8 +187,7 @@ namespace DaocClientLib.Demo
 
 		private void UnloadLevel()
 		{
-			GL.DeleteBuffer(levelVbo);
-			GL.DeleteBuffer(levelNormVbo);
+			_level.Unload();
 		}
 
 		private void UnloadDebugMeshes()
@@ -260,33 +239,6 @@ namespace DaocClientLib.Demo
 			GL.PopMatrix();
 			GL.MatrixMode(MatrixMode.Modelview);
 			GL.PopMatrix();
-		}
-
-		private void DrawLevel()
-		{
-			GL.EnableClientState(ArrayCap.VertexArray);
-
-			if (levelHasNorm)
-				GL.EnableClientState(ArrayCap.NormalArray);
-
-			GL.BindBuffer(BufferTarget.ArrayBuffer, levelVbo);
-			GL.VertexPointer(3, VertexPointerType.Float, 0, 0);
-
-			if (levelHasNorm)
-			{
-				GL.BindBuffer(BufferTarget.ArrayBuffer, levelNormVbo);
-				GL.NormalPointer(NormalPointerType.Float, 0, 0);
-			}
-
-			GL.DrawArrays(PrimitiveType.Triangles, 0, levelNumVerts / 3);
-
-			GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-			GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-
-			if (levelHasNorm)
-				GL.DisableClientState(ArrayCap.NormalArray);
-
-			GL.DisableClientState(ArrayCap.VertexArray);
 		}
 
 		private void DrawHeightfield()
@@ -815,7 +767,7 @@ namespace DaocClientLib.Demo
 
 			GL.PopMatrix();
 		}
-
+/*
 		private void DrawLevelOutline()
 		{
 			if (_level == null)
@@ -846,7 +798,7 @@ namespace DaocClientLib.Demo
 
 			GL.PopMatrix();
 		}
-
+*/
 		private void DrawNavMesh()
 		{
 			if (tiledNavMesh == null)

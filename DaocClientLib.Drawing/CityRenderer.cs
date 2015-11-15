@@ -27,8 +27,18 @@
 namespace DaocClientLib.Drawing
 {
 	using System;
+	using System.Linq;
 	using System.IO;
 	using System.Collections.Generic;
+
+	#if OpenTK
+	using OpenTK;
+	using Matrix = OpenTK.Matrix4;
+	#elif SharpDX
+	using SharpDX;
+	#elif MonoGame
+	using Microsoft.Xna.Framework;
+	#endif
 
 	/// <summary>
 	/// Zone Renderer for City Type
@@ -38,8 +48,11 @@ namespace DaocClientLib.Drawing
 		public CityRenderer(int id, IEnumerable<FileInfo> files, ZoneType type, ClientDataWrapper wrapper)
 			: base(id, files, type, wrapper)
 		{
-			foreach(var nif in CityNifs)
-				AddNifMesh(nif.Key, nif.Value);
+			var nifs = CityNifs;
+			AddNifCache(nifs);
+			Matrix scaleMatrix;
+			ZoneDrawingExtensions.CreateScale(UnitFactor, out scaleMatrix);
+			InstancesMatrix = nifs.Select(n => new KeyValuePair<int, Matrix>(n.Key, scaleMatrix)).ToArray();
 		}
 	}
 }

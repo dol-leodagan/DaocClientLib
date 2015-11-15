@@ -44,16 +44,116 @@ namespace DaocClientLib.Drawing
 	/// </summary>
 	public static class ZoneDrawingExtensions
 	{
-		public static Vector3 Test()
+		/// <summary>
+		/// Get World Matrix For NifGeometry
+		/// </summary>
+		/// <param name="nifGeom"></param>
+		/// <returns></returns>
+		public static Matrix ComputeWorldMatrixYZSwapped(this NifGeometry nifGeom, float translateFactor, TerrainHeightCalculator heightCalculator)
 		{
-			using (var stream = new System.IO.BinaryReader(new System.IO.MemoryStream(new byte[0])))
+			if (nifGeom == null)
+				throw new ArgumentNullException("nifGeom");
+			
+			// Find Ground
+			float nifHeight = nifGeom.Z * translateFactor;
+			if (nifGeom.OnGround)
 			{
-				var nif = new NiFile(stream);
+				nifHeight = heightCalculator[nifGeom.X, nifGeom.Y] * translateFactor;
 			}
 			
-			var test = new ClientDataWrapper("");
+			// Start with Indentity Matrix
+			Matrix result = Matrix.Identity;
 			
-			return new Vector3();
+			// Get Translation, Scale, Rotatio
+			Matrix translation;
+			CreateTranslation(nifGeom.X * translateFactor, nifHeight, nifGeom.Y * translateFactor, out translation);
+			Matrix scale;
+			CreateScale(nifGeom.Scale * translateFactor, out scale);
+			Matrix rotation;
+			CreateRotation(new Vector3(nifGeom.RotationX, nifGeom.RotationZ, nifGeom.RotationY), nifGeom.Angle , out rotation);
+			
+			// Combine Translation, Scale, Rotation
+			Matrix intermediateResult;
+			Mult(ref result, ref scale, out intermediateResult);
+			result = intermediateResult;
+			Mult(ref result, ref rotation, out intermediateResult);
+			result = intermediateResult;
+			Mult(ref result, ref translation, out intermediateResult);
+			result = intermediateResult;
+
+			// Combine Matrix with Parent Matrix
+			if (nifGeom.RelativeTo != null)
+			{
+				Matrix relativeMatrix = nifGeom.RelativeTo.ComputeWorldMatrixYZSwapped(translateFactor, heightCalculator);
+				Mult(ref result, ref relativeMatrix, out intermediateResult);
+				result = intermediateResult;
+			}
+
+			return result;
+		}
+		
+		/// <summary>
+		/// Get Translation Matrix for TreeData
+		/// </summary>
+		/// <param name="tree"></param>
+		/// <returns></returns>
+		public static Matrix ComputeWorldMatrixYZSwapped(this TreeData tree, float translateFactor)
+		{
+			Matrix result = Matrix.Identity;
+			
+			Matrix translation;
+			CreateTranslation(tree.OffsetX * translateFactor, tree.OffsetZ * translateFactor, tree.OffsetY * translateFactor, out translation);
+			Matrix intermediateResult;
+			Mult(ref result, ref translation, out intermediateResult);
+			result = intermediateResult;
+			return result;
+		}
+		
+		/// <summary>
+		/// Matrix Overload for Framework Match
+		/// </summary>
+		public static void Mult(ref Matrix left, ref Matrix right, out Matrix result)
+		{
+			#if OpenTK
+			Matrix.Mult(ref left, ref right, out result);
+			#else
+			Matrix.Multiply(ref left, ref right, out result);
+			#endif
+		}		
+		/// <summary>
+		/// Matrix Overload for Framework Match
+		/// </summary>
+		public static void CreateTranslation(float x, float y, float z, out Matrix result)
+		{
+			#if SharpDX
+			Matrix.Translation(x, y, z, out result);
+			#else
+			Matrix.CreateTranslation(x, y, z, out result);
+			#endif
+		}
+		/// <summary>
+		/// Matrix Overload for Framework Match
+		/// </summary>
+		public static void CreateScale(float scale, out Matrix result)
+		{
+			#if SharpDX
+			Matrix.Scaling(scale, out result);
+			#else
+			Matrix.CreateScale(scale, out result);
+			#endif
+		}
+		/// <summary>
+		/// Matrix Overload for Framework Match
+		/// </summary>
+		public static void CreateRotation(Vector3 axis, float angle, out Matrix result)
+		{
+			#if SharpDX
+			Matrix.RotationAxis(ref axis, angle, out result);
+			#elif OpenTK
+			Matrix.CreateFromAxisAngle(axis, angle, out result);
+			#else
+			Matrix.CreateFromAxisAngle(ref axis, angle, out result);
+			#endif
 		}
 	}
 }

@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Globalization;
 
 namespace DaocClientLib
 {
@@ -150,9 +151,9 @@ namespace DaocClientLib
 					{
 						try
 						{
-							var x = float.Parse(cluster.ElementAt(i));
-							var y = float.Parse(cluster.ElementAt(i+1));
-							var z = float.Parse(cluster.ElementAt(i+2));
+							var x = float.Parse(cluster.ElementAt(i), CultureInfo.InvariantCulture);
+							var y = float.Parse(cluster.ElementAt(i+1), CultureInfo.InvariantCulture);
+							var z = float.Parse(cluster.ElementAt(i+2), CultureInfo.InvariantCulture);
 							
 							// empty data
 							if (x == 0f && y == 0f && z == 0f)
