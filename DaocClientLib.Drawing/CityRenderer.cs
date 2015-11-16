@@ -51,7 +51,7 @@ namespace DaocClientLib.Drawing
 			var nifs = CityNifs;
 			AddNifCache(nifs);
 			Matrix scaleMatrix;
-			ZoneDrawingExtensions.CreateScale(UnitFactor, out scaleMatrix);
+			ZoneDrawingExtensions.CreateScale(UnitFactor, UnitFactor, -1f * UnitFactor, out scaleMatrix);
 			InstancesMatrix = nifs.Select(n => new KeyValuePair<int, Matrix>(n.Key, scaleMatrix)).ToArray();
 		}
 	}

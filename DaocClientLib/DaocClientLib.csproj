@@ -93,11 +93,5 @@
     <Folder Include="Tree" />
     <Folder Include="Zone" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="ProfilingSessions\Session20151114_212404.sdps" />
-    <Content Include="ProfilingSessions\Session20151114_214309.sdps" />
-    <Content Include="ProfilingSessions\Session20151114_214813.sdps" />
-    <Content Include="ProfilingSessions\Session20151114_223938.sdps" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

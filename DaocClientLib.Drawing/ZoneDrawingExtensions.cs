@@ -48,6 +48,8 @@ namespace DaocClientLib.Drawing
 		/// Get World Matrix For NifGeometry
 		/// </summary>
 		/// <param name="nifGeom"></param>
+		/// <param name="translateFactor"></param>
+		/// <param name="heightCalculator"></param>
 		/// <returns></returns>
 		public static Matrix ComputeWorldMatrixYZSwapped(this NifGeometry nifGeom, float translateFactor, TerrainHeightCalculator heightCalculator)
 		{
@@ -89,6 +91,14 @@ namespace DaocClientLib.Drawing
 				result = intermediateResult;
 			}
 
+			if (nifGeom.Flip)
+			{
+				Matrix flip;
+				CreateScale(1f, 1f, -1f, out flip);
+				Mult(ref result, ref flip, out intermediateResult);
+				result = intermediateResult;
+			}
+			
 			return result;
 		}
 		

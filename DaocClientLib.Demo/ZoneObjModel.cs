@@ -175,6 +175,12 @@ namespace DaocClientLib.Demo
 			{
 				var trans = mesh.Value;
 				
+				// check if the Mesh has been inverted to change Face Direction
+				if (trans.Determinant < 0)
+					GL.FrontFace(FrontFaceDirection.Cw);
+				else
+					GL.FrontFace(FrontFaceDirection.Ccw);
+				
 				KeyValuePair<int, int> buffer;
 				if (!NifIdBufferIndex.TryGetValue(mesh.Key, out buffer))
 					continue;
@@ -207,6 +213,7 @@ namespace DaocClientLib.Demo
 
 			GL.DisableClientState(ArrayCap.NormalArray);
 			GL.DisableClientState(ArrayCap.VertexArray);
+			GL.FrontFace(FrontFaceDirection.Ccw);
 		}
 		
 		public void Unload()

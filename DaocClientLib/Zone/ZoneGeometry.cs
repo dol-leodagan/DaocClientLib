@@ -317,7 +317,11 @@ namespace DaocClientLib
 					        	float RotY = float.Parse(line[6], CultureInfo.InvariantCulture);
 					        	float RotZ = float.Parse(line[7], CultureInfo.InvariantCulture);
 					        	
-					        	return new NifGeometry(nifId, index, nifName, nifName, X, Y, Z, 1f, Angle, RotX, RotY, RotZ, false, false, null);
+					        	bool Flip = false;
+					        	if (line.Length > 10) // FIXME: is this really Flip ?
+					        		Flip = short.Parse(line[10]) != 0;
+					        	
+					        	return new NifGeometry(nifId, index, nifName, nifName, X, Y, Z, 1f, Angle, RotX, RotY, RotZ, Flip, false, null);
 					        }
 					       ).Where(nif => nif != null).ToArray();
 			}
@@ -412,7 +416,7 @@ namespace DaocClientLib
 					        	int A = int.Parse(line[6]);
 					        	float Scale = int.Parse(line[7]) / 100f;
 					        	bool ground = int.Parse(line[11]) > 0;
-					        	bool flip = int.Parse(line[12]) > 0;
+					        	bool flip = int.Parse(line[12]) > 0; // FIXME : is this really flip ?
 					        	float Angle = (float)(A * Math.PI / 180);
 					        	float RotX = 0f;
 					        	float RotY = 0f;
