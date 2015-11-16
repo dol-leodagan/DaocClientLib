@@ -144,6 +144,7 @@
   <ItemGroup>
     <Compile Include="ClientDataWrapperImportTest.cs" />
     <Compile Include="ClientDataWrapperTest.cs" />
+    <Compile Include="FunctionalTest.cs" />
     <Compile Include="PCXDecoderTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TinyMPKTest.cs" />

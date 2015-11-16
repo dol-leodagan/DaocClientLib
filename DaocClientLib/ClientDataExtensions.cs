@@ -132,11 +132,11 @@ namespace DaocClientLib
 		}
 		
 		/// <summary>
-		/// Extract a File from MPK package 
+		/// Extract all Files from MPK package 
 		/// </summary>
 		/// <param name="data"></param>
 		/// <param name="packageName"></param>
-		/// <returns>File Byte Array</returns>
+		/// <returns>Dictionary of File Byte Array</returns>
 		public static IDictionary<string, byte[]> GetAllFileDataFromPackage(this FileInfo[] data, string packageName)
 		{
 			if (data == null)
@@ -149,6 +149,21 @@ namespace DaocClientLib
 			if(pack == null)
 				throw new FileNotFoundException("Package could not be found !", packageName);
 			
+			return new TinyMPK(pack).ToDictionary(k => k.Key, v => v.Value.Data);
+		}
+		
+		/// <summary>
+		/// Extract all Files from MPK package 
+		/// </summary>
+		/// <param name="data"></param>
+		/// <returns>Dictionary of File Byte Array</returns>
+		public static IDictionary<string, byte[]> GetAllFileDataFromPackage(this FileInfo data)
+		{
+			if (data == null)
+				throw new ArgumentNullException("data");
+			
+			var pack = data;
+						
 			return new TinyMPK(pack).ToDictionary(k => k.Key, v => v.Value.Data);
 		}
 	}
