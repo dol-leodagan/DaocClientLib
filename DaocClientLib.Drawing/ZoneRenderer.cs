@@ -273,7 +273,7 @@ namespace DaocClientLib.Drawing
 		protected void SwapYZTriangleCollection(ref TriangleCollection tris, out TriangleCollection result)
 		{
 			var mesh = tris;
-			var newVerts = mesh.Vertices.Select(v => { Vector3 res; Vector3.TransformVector(ref v, ref FlipMatrix, out res); return res; }).ToArray();
+			var newVerts = mesh.Vertices.Select(v => { Vector3 res; Vector3.Transform(ref v, ref FlipMatrix, out res); return res; }).ToArray();
 			var newIndices = mesh.Indices.Select(tri => new TriangleIndex { A = tri.C, B = tri.B, C = tri.A}).ToArray();
 			result = new TriangleCollection
 			{

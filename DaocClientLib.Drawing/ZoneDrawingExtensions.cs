@@ -145,6 +145,17 @@ namespace DaocClientLib.Drawing
 		/// <summary>
 		/// Matrix Overload for Framework Match
 		/// </summary>
+		public static void CreateScale(float x, float y, float z, out Matrix result)
+		{
+			#if SharpDX
+			Matrix.Scaling(x, y, z, out result);
+			#else
+			Matrix.CreateScale(x, y, z, out result);
+			#endif
+		}
+		/// <summary>
+		/// Matrix Overload for Framework Match
+		/// </summary>
 		public static void CreateRotation(Vector3 axis, float angle, out Matrix result)
 		{
 			#if SharpDX
