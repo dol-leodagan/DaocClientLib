@@ -40,7 +40,7 @@ namespace DaocClientLib
 		Terrain = 0,
 		Dungeon = 2,
 		City = 1,
-		InstancedDungeon = 4,
+		SkyCity = 4,
 	}
 	
 	/// <summary>
@@ -100,7 +100,19 @@ namespace DaocClientLib
 		/// <summary>
 		/// This Zone Dungeon Props File
 		/// </summary>
-		private string DungeonPropFile { get { return "dungeon.place"; } }
+		private string DungeonPropFile { get { return "dungeon.prop"; } }
+		/// <summary>
+		/// This Zone Dungeon Chunk File
+		/// </summary>
+		private string SkyCityChunkFile { get { return "skycity.chunk"; } }
+		/// <summary>
+		/// This Zone Dungeon Place File
+		/// </summary>
+		private string SkyCityPlaceFile { get { return "skycity.place"; } }
+		/// <summary>
+		/// This Zone Dungeon Props File
+		/// </summary>
+		private string SkyCityPropFile { get { return "skycity.prop"; } }
 		/// <summary>
 		/// This Zone Terrain Nifs File
 		/// </summary>
@@ -284,6 +296,8 @@ namespace DaocClientLib
 		{
 			get
 			{
+				if (ZoneType == ZoneType.SkyCity)
+					return m_files.GetFileDataFromPackage(DatPackage, SkyCityChunkFile).ReadCSVFile().Select(line => line.FirstOrDefault()).ToArray();
 				return m_files.GetFileDataFromPackage(DatPackage, DungeonChunkFile).ReadCSVFile().Select(line => line.FirstOrDefault()).ToArray();
 			}
 		}
@@ -297,7 +311,8 @@ namespace DaocClientLib
 			{
 				var chunks = DungeonChunk;
 				int index = -1;
-				return m_files.GetFileDataFromPackage(DatPackage, DungeonPlaceFile).ReadCSVFile()
+				var places = ZoneType == ZoneType.SkyCity ? SkyCityPlaceFile : DungeonPlaceFile;
+				return m_files.GetFileDataFromPackage(DatPackage, places).ReadCSVFile()
 					.Select(line =>
 					        {
 					        	if (line.Length < 8)
@@ -337,7 +352,8 @@ namespace DaocClientLib
 				var chunks = DungeonChunk;
 				var places = DungeonPlaces;
 				int index = -1;
-				return m_files.GetFileDataFromPackage(DatPackage, DungeonPropFile).ReadCSVFile()
+				var props = ZoneType == ZoneType.SkyCity ? SkyCityPropFile : DungeonPropFile;
+				return m_files.GetFileDataFromPackage(DatPackage, props).ReadCSVFile()
 					.Select(line =>
 					        {
 					        	if (line.Length < 11)
@@ -478,7 +494,7 @@ namespace DaocClientLib
 		/// </summary>
 		public bool IsDungeon
 		{
-			get { return ZoneType == ZoneType.Dungeon || ZoneType == ZoneType.InstancedDungeon; }
+			get { return ZoneType == ZoneType.Dungeon || ZoneType == ZoneType.SkyCity; }
 		}
 		/// <summary>
 		/// Is this Zone a City ?

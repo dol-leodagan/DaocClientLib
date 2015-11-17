@@ -57,7 +57,7 @@ namespace DaocClientLib.Drawing
 							case ZoneType.City:
 								return new CityRenderer(Index, files, type, ClientWrapper);
 							case ZoneType.Dungeon:
-							case ZoneType.InstancedDungeon:
+							case ZoneType.SkyCity:
 								return new DungeonRenderer(Index, files, type, ClientWrapper);
 								
 								

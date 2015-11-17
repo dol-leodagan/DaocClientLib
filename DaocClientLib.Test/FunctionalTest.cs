@@ -41,12 +41,20 @@ namespace DaocClientLib.Test
 	[TestFixture]
 	public class FunctionalTest
 	{
-		[Test, Explicit]
-		public void Test()
+		protected ClientDataWrapper client;
+		protected DirectoryInfo extract;
+		protected string loc = @"E:\Dark Age of Camelot1118L";
+		
+		[TestFixtureSetUp]
+		public void Init()
 		{
-			string loc = @"E:\Dark Age of Camelot1118L";
-			var client = new ClientDataWrapper(loc);
-			var extract = new DirectoryInfo(@"E:\extract\");
+			client = new ClientDataWrapper(loc);
+			extract = new DirectoryInfo(@"E:\extract\");
+		}
+		
+		[Test, Explicit]
+		public void ExtractAllClientPackage()
+		{
 			foreach (var file in client.ClientFiles.Where(f => f.Extension.Equals(".mpk") || f.Extension.Equals(".npk")))
 			{
 				var path = extract.FullName + file.Directory.FullName.Substring(loc.Length);
@@ -56,6 +64,36 @@ namespace DaocClientLib.Test
 					File.WriteAllBytes(path + Path.DirectorySeparatorChar + packaged.Key, packaged.Value);
 				}
 			}
+		}
+		
+		[Test, Explicit]
+		public void TestClientZoneEdgeCases()
+		{
+			var zones = client.ZonesData;
+			var geometries = client.ZonesGeometry;
+			var results = new List<NifGeometry>();
+			foreach(var zone in zones.Where(zn => !zn.IsProxyZone))
+			{
+				var id = zone.ID;
+				var geometry = geometries[id];
+				
+				if (geometry == null)
+					continue;
+				
+				if (geometry.IsCity)
+					continue;
+				
+				NifGeometry[] geoms;
+				if (geometry.IsDungeon)
+					geoms = geometry.DungeonPlaces;
+				else
+					geoms = geometry.TerrainFixtures;
+				
+				results.AddRange(geoms.Where(nif => nif.Flip));
+			}
+			
+			if (results.Count > 0)
+				return;
 		}
 		
 		public FunctionalTest()
