@@ -417,10 +417,20 @@ namespace DaocClientLib
 					        	float Scale = int.Parse(line[7]) / 100f;
 					        	bool ground = int.Parse(line[11]) > 0;
 					        	bool flip = int.Parse(line[12]) > 0; // FIXME : is this really flip ?
-					        	float Angle = (float)(A * Math.PI / 180);
+					        	float Angle = 0f;
 					        	float RotX = 0f;
 					        	float RotY = 0f;
-					        	float RotZ = -1f;
+					        	float RotZ = 0f;
+					        	if (A > 180)
+					        	{
+					        		Angle = (float)((A - 360) * Math.PI / 180f * -1f);
+					        		RotZ = 1f;
+					        	}
+					        	else
+					        	{
+					        		Angle  = (float)(A * Math.PI / 180f);
+					        		RotZ = -1f;
+					        	}
 					        	// Long Version
 					        	if (line.Length > 18)
 					        	{
@@ -429,7 +439,6 @@ namespace DaocClientLib
 						        	RotY = float.Parse(line[17], CultureInfo.InvariantCulture);
 						        	RotZ = float.Parse(line[18], CultureInfo.InvariantCulture);
 					        	}
-					        	
 					        	// TODO angle / A ?? Z ??
 					        	return new NifGeometry(nifId, index, nifname, line[2], X, Y, Z, Scale, Angle, RotX, RotY, RotZ, flip, ground, null);
 					        }).Where(nif => nif != null).ToArray();
