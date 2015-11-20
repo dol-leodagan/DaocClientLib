@@ -43,13 +43,13 @@ namespace DaocClientLib.Test
 	{
 		protected ClientDataWrapper client;
 		protected DirectoryInfo extract;
-		protected string loc = @"E:\Dark Age of Camelot1118L";
+		protected string loc = @"C:\Dark Age of Camelot1118L";
 		
 		[TestFixtureSetUp]
 		public void Init()
 		{
 			client = new ClientDataWrapper(loc);
-			extract = new DirectoryInfo(@"E:\extract\");
+			extract = new DirectoryInfo(@"D:\extract\");
 		}
 		
 		[Test, Explicit]
@@ -89,7 +89,12 @@ namespace DaocClientLib.Test
 				else
 					geoms = geometry.TerrainFixtures;
 				
-				results.AddRange(geoms.Where(nif => nif.Flip));
+				var withFlips = geoms.Where(nif => nif.Flip).ToArray();
+				
+				results.AddRange(withFlips);
+				
+				if (withFlips.Any())
+					continue;
 			}
 			
 			if (results.Count > 0)

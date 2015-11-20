@@ -81,15 +81,9 @@ namespace DaocClientLib.Drawing
 		protected TerrainHeightCalculator TerrainHeightCache { get; set; }
 		
 		/// <summary>
-		/// Matrix for Flipping Nif Left/Right Display
+		/// Matrix To rotate Meshes 
 		/// </summary>
-		protected static Matrix FlipMatrix = new Matrix
-		{
-			M11 = 1, M12 = 0, M13 = 0, M14 = 0,
-			M21 = 0, M22 = 0, M23 = 1, M24 = 0,
-			M31 = 0, M32 = 1, M33 = 0, M34 = 0,
-			M41 = 0, M42 = 0, M43 = 0, M44 = 1,
-		};
+		protected static Matrix FlipMatrix = Matrix.CreateRotationX((float)(Math.PI / -2f));
 
 		/// <summary>
 		/// Layers Categories to Retrieve From Nif Objects
@@ -99,9 +93,9 @@ namespace DaocClientLib.Drawing
 			get 
 			{
 				return new Dictionary<string, string[]> {
-					{ "pickee", new []{ "pickee", "collidee", "visible", "exterior", } },
-					{ "collidee", new []{ "collidee", "visible", "exterior", } },
-					{ "visible", new []{ "visible", "exterior", } },
+					{ "pickee", new []{ "pickee", "collidee", "visible", "exterior", "near", } },
+					{ "collidee", new []{ "collidee", "visible", "exterior", "near", } },
+					{ "visible", new []{ "visible", "exterior", "near", } },
 					{ "climb", new []{ "climb[0-9]{3}", } },
 					{ "door", new []{ "door[0-9]{3}", } },
 				};
@@ -199,9 +193,6 @@ namespace DaocClientLib.Drawing
 									                                                 	TriangleWalker.Concat(ref t1, ref t2, out concat);
 									                                                 	return concat;
 									                                                 });
-									TriangleCollection rotated;
-									SwapYZTriangleCollection(ref tris, out rotated);
-									tris = rotated;
 									break;
 								}
 							}
@@ -247,39 +238,32 @@ namespace DaocClientLib.Drawing
 			foreach (var geometry in geometries)
 			{
 				var trees = TreeReplacement[geometry.FileName];
-				var nifMatrix = geometry.ComputeWorldMatrixYZSwapped(UnitFactor, TerrainHeightCache);
+				var nifMatrix = geometry.ComputeWorldMatrix(UnitFactor, TerrainHeightCache);
+				Matrix final;
+				ZoneDrawingExtensions.Mult(ref FlipMatrix, ref nifMatrix, out final);
+				nifMatrix = final;
 				
 				// Tree match, Compose Matrix
 				if (trees.Length > 0)
 				{
 					foreach (var tree in trees)
 					{
-						var instance = tree.ComputeWorldMatrixYZSwapped(UnitFactor);
+						var instance = tree.ComputeWorldMatrix(UnitFactor);
 						Matrix translate;
 						ZoneDrawingExtensions.Mult(ref nifMatrix, ref instance, out translate);
-						result.Add(new KeyValuePair<int, Matrix>(geometry.MeshID, translate));
+						nifMatrix = translate;
 					}
 				}
-				else
-				{
-					// Use Nif Matrix
-					result.Add(new KeyValuePair<int, Matrix>(geometry.MeshID, nifMatrix));
-				}
+				
+				// Coord Swap
+				var tmp = nifMatrix.Row3.Z;
+				nifMatrix.Row3.Z = nifMatrix.Row3.Y;
+				nifMatrix.Row3.Y = tmp;
+				
+				result.Add(new KeyValuePair<int, Matrix>(geometry.MeshID, nifMatrix));
 			}
 			
 			InstancesMatrix = InstancesMatrix.Concat(result).ToArray();
 		}
-		
-		protected void SwapYZTriangleCollection(ref TriangleCollection tris, out TriangleCollection result)
-		{
-			var mesh = tris;
-			var newVerts = mesh.Vertices.Select(v => { Vector3 res; Vector3.Transform(ref v, ref FlipMatrix, out res); return res; }).ToArray();
-			var newIndices = mesh.Indices.Select(tri => new TriangleIndex { A = tri.C, B = tri.B, C = tri.A}).ToArray();
-			result = new TriangleCollection
-			{
-				Vertices = newVerts,
-				Indices = newIndices,
-			};
-		}	
 	}
 }

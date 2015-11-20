@@ -331,10 +331,10 @@ namespace DaocClientLib
 					        	float RotX = float.Parse(line[5], CultureInfo.InvariantCulture);
 					        	float RotY = float.Parse(line[6], CultureInfo.InvariantCulture);
 					        	float RotZ = float.Parse(line[7], CultureInfo.InvariantCulture);
-					        	
+					        	// Read Flip Value if available
 					        	bool Flip = false;
-					        	if (line.Length > 10) // FIXME: is this really Flip ?
-					        		Flip = short.Parse(line[10]) != 0;
+					        	if (line.Length > 11)
+					        		Flip = short.Parse(line[11]) != 0; // FIXME: is this really Flip ?
 					        	
 					        	return new NifGeometry(nifId, index, nifName, nifName, X, Y, Z, 1f, Angle, RotX, RotY, RotZ, Flip, false, null);
 					        }
@@ -432,14 +432,14 @@ namespace DaocClientLib
 					        	int A = int.Parse(line[6]);
 					        	float Scale = int.Parse(line[7]) / 100f;
 					        	bool ground = int.Parse(line[11]) > 0;
-					        	bool flip = int.Parse(line[12]) > 0; // FIXME : is this really flip ?
+					        	bool flip = int.Parse(line[12]) != 0; // FIXME : is this really flip ?
 					        	float Angle = 0f;
 					        	float RotX = 0f;
 					        	float RotY = 0f;
 					        	float RotZ = 0f;
 					        	if (A > 180)
 					        	{
-					        		Angle = (float)((A - 360) * Math.PI / 180f * -1f);
+					        		Angle = (float)((A - 360) * Math.PI / -180f);
 					        		RotZ = 1f;
 					        	}
 					        	else
@@ -455,7 +455,6 @@ namespace DaocClientLib
 						        	RotY = float.Parse(line[17], CultureInfo.InvariantCulture);
 						        	RotZ = float.Parse(line[18], CultureInfo.InvariantCulture);
 					        	}
-					        	// TODO angle / A ?? Z ??
 					        	return new NifGeometry(nifId, index, nifname, line[2], X, Y, Z, Scale, Angle, RotX, RotY, RotZ, flip, ground, null);
 					        }).Where(nif => nif != null).ToArray();
 			}
@@ -509,13 +508,19 @@ namespace DaocClientLib
 		/// </summary>
 		/// <param name="id"></param>
 		/// <param name="files"></param>
+		/// <param name="type"></param>
 		public ZoneGeometry(int id, IEnumerable<FileInfo> files, ZoneType type)
 		{
 			if (files == null)
 				throw new ArgumentNullException("files");
-			
+			// Assign ID
 			ID = id;
+			// Copy Files Array
 			m_files = files.ToArray();
+			// Assign Zone Type
+			ZoneType = type;
+			
+			// Parse Sector.dat
 			IDictionary<string, IDictionary<string, string>> sectorDat;
 			try
 			{
@@ -523,11 +528,10 @@ namespace DaocClientLib
 			}
 			catch (Exception e)
 			{
+				// FIXME : some Zones have no DAT but should be drawable anyway if they're not Terrain...
+				return;
 				throw new ArgumentException(string.Format("No usable sector.dat Found when building Zone ID: {0}", id), "files", e);
-			}
-			
-			// Assign Zone Type
-			ZoneType = type;
+			}			
 			
 			// Read Terrain
 			IDictionary<string, string> terrain;

@@ -51,7 +51,7 @@ namespace DaocClientLib.Drawing
 		/// <param name="translateFactor"></param>
 		/// <param name="heightCalculator"></param>
 		/// <returns></returns>
-		public static Matrix ComputeWorldMatrixYZSwapped(this NifGeometry nifGeom, float translateFactor, TerrainHeightCalculator heightCalculator)
+		public static Matrix ComputeWorldMatrix(this NifGeometry nifGeom, float translateFactor, TerrainHeightCalculator heightCalculator)
 		{
 			if (nifGeom == null)
 				throw new ArgumentNullException("nifGeom");
@@ -68,14 +68,22 @@ namespace DaocClientLib.Drawing
 			
 			// Get Translation, Scale, Rotatio
 			Matrix translation;
-			CreateTranslation(nifGeom.X * translateFactor, nifHeight, nifGeom.Y * translateFactor, out translation);
+			CreateTranslation(nifGeom.X * translateFactor, nifGeom.Y * translateFactor, nifHeight, out translation);
 			Matrix scale;
 			CreateScale(nifGeom.Scale * translateFactor, out scale);
 			Matrix rotation;
-			CreateRotation(new Vector3(nifGeom.RotationX, nifGeom.RotationZ, nifGeom.RotationY), nifGeom.Angle , out rotation);
+			CreateRotation(new Vector3(nifGeom.RotationX, nifGeom.RotationY, nifGeom.RotationZ), nifGeom.Angle , out rotation);
 			
-			// Combine Translation, Scale, Rotation
 			Matrix intermediateResult;
+			// Flip
+			if (nifGeom.Flip)
+			{
+				Matrix flip;
+				CreateScale(-1f, 1f, 1f, out flip);
+				Mult(ref result, ref flip, out intermediateResult);
+				result = intermediateResult;
+			}
+			// Combine Translation, Scale, Rotation
 			Mult(ref result, ref scale, out intermediateResult);
 			result = intermediateResult;
 			Mult(ref result, ref rotation, out intermediateResult);
@@ -86,16 +94,8 @@ namespace DaocClientLib.Drawing
 			// Combine Matrix with Parent Matrix
 			if (nifGeom.RelativeTo != null)
 			{
-				Matrix relativeMatrix = nifGeom.RelativeTo.ComputeWorldMatrixYZSwapped(translateFactor, heightCalculator);
+				Matrix relativeMatrix = nifGeom.RelativeTo.ComputeWorldMatrix(translateFactor, heightCalculator);
 				Mult(ref result, ref relativeMatrix, out intermediateResult);
-				result = intermediateResult;
-			}
-
-			if (nifGeom.Flip)
-			{
-				Matrix flip;
-				CreateScale(1f, 1f, -1f, out flip);
-				Mult(ref result, ref flip, out intermediateResult);
 				result = intermediateResult;
 			}
 			
@@ -107,16 +107,11 @@ namespace DaocClientLib.Drawing
 		/// </summary>
 		/// <param name="tree"></param>
 		/// <returns></returns>
-		public static Matrix ComputeWorldMatrixYZSwapped(this TreeData tree, float translateFactor)
+		public static Matrix ComputeWorldMatrix(this TreeData tree, float translateFactor)
 		{
-			Matrix result = Matrix.Identity;
-			
 			Matrix translation;
-			CreateTranslation(tree.OffsetX * translateFactor, tree.OffsetZ * translateFactor, tree.OffsetY * translateFactor, out translation);
-			Matrix intermediateResult;
-			Mult(ref result, ref translation, out intermediateResult);
-			result = intermediateResult;
-			return result;
+			CreateTranslation(tree.OffsetX * translateFactor, tree.OffsetY * translateFactor, tree.OffsetZ * translateFactor, out translation);
+			return translation;
 		}
 		
 		/// <summary>

@@ -31,6 +31,15 @@ namespace DaocClientLib.Drawing
 	using System.IO;
 	using System.Collections.Generic;
 
+	#if OpenTK
+	using OpenTK;
+	using Matrix = OpenTK.Matrix4;
+	#elif SharpDX
+	using SharpDX;
+	#elif MonoGame
+	using Microsoft.Xna.Framework;
+	#endif
+
 	/// <summary>
 	/// Zone Renderer for Dungeon Type
 	/// </summary>
