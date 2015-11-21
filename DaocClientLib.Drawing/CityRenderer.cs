@@ -53,7 +53,7 @@ namespace DaocClientLib.Drawing
 			Matrix scaleMatrix;
 			ZoneDrawingExtensions.CreateScale(UnitFactor, UnitFactor, UnitFactor, out scaleMatrix);
 			Matrix rotated;
-			ZoneDrawingExtensions.Mult(ref scaleMatrix, ref FlipMatrix, out rotated);
+			ZoneDrawingExtensions.Mult(ref scaleMatrix, ref RotationMatrix, out rotated);
 			InstancesMatrix = nifs.Select(n => new KeyValuePair<int, Matrix>(n.Key, rotated)).ToArray();
 		}
 	}

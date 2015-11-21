@@ -51,5 +51,84 @@ namespace DaocClientLib.Drawing
 			AddNifCache(DungeonChunk.Select((s, i) => new KeyValuePair<int, string>(i, s)).ToDictionary(v => v.Key, v => v.Value));
 			AddNifInstancesYZSwapped(DungeonPlaces);
 		}
+		/// <summary>
+		/// Add Each Nif Geometry as an Instanced Meshes with World Matrix computed
+		/// </summary>
+		/// <param name="geometries">Collection of Nif Geometry</param>
+		protected void AddNifInstancesYZSwapped(IEnumerable<NifGeometry> geometries)
+		{
+			var result = new List<KeyValuePair<int, Matrix>>();
+			foreach (var geometry in geometries)
+			{
+				var trees = TreeReplacement[geometry.FileName];
+				var nifMatrix = ComputeWorldMatrix(geometry, UnitFactor);
+				// Tree match, Compose Matrix
+				if (trees.Length > 0)
+				{
+					foreach (var tree in trees)
+					{
+						Matrix instance;
+						Matrix translate;
+						ZoneDrawingExtensions.CreateTranslation(tree.OffsetX * UnitFactor, tree.OffsetZ * UnitFactor, tree.OffsetY * UnitFactor, out instance);
+						ZoneDrawingExtensions.Mult(ref nifMatrix, ref instance, out translate);
+						nifMatrix = translate;
+					}
+				}
+								
+				result.Add(new KeyValuePair<int, Matrix>(geometry.MeshID, nifMatrix));
+			}
+			
+			InstancesMatrix = InstancesMatrix.Concat(result).ToArray();
+		}
+
+		/// <summary>
+		/// Get World Matrix For NifGeometry
+		/// </summary>
+		/// <param name="nifGeom"></param>
+		/// <param name="UnitFactor"></param>
+		/// <returns></returns>
+		protected static Matrix ComputeWorldMatrix(NifGeometry nifGeom, float UnitFactor)
+		{
+			if (nifGeom == null)
+				throw new ArgumentNullException("nifGeom");
+			
+			// Get Translation (XY Inverted), Scale, Rotation
+			Matrix translation;
+			ZoneDrawingExtensions.CreateTranslation(nifGeom.X * UnitFactor, nifGeom.Y * UnitFactor, nifGeom.Z * UnitFactor, out translation);
+			Matrix scale;
+			ZoneDrawingExtensions.CreateScale(nifGeom.Scale * UnitFactor, out scale);
+			Matrix rotation;
+			ZoneDrawingExtensions.CreateRotation(new Vector3(nifGeom.RotationX, nifGeom.RotationY, nifGeom.RotationZ * -1f), nifGeom.Angle , out rotation);
+			
+			Matrix result = Matrix.Identity;
+			// Flip if needed
+			if (nifGeom.Flip)
+			{
+				Matrix flip;
+				ZoneDrawingExtensions.CreateScale(-1f, 1f, 1f, out flip);
+				result = flip;
+			}
+			
+			Matrix intermediateResult;
+			// Combine Scale, Rotation, Translation, Invertion Rotation
+			ZoneDrawingExtensions.Mult(ref result, ref scale, out intermediateResult);
+			result = intermediateResult;
+			ZoneDrawingExtensions.Mult(ref result, ref rotation, out intermediateResult);
+			result = intermediateResult;
+			ZoneDrawingExtensions.Mult(ref result, ref translation, out intermediateResult);
+			result = intermediateResult;
+			ZoneDrawingExtensions.Mult(ref result, ref RotationMatrix, out intermediateResult);
+			result = intermediateResult;
+
+			// Combine Matrix with Parent Matrix
+			if (nifGeom.RelativeTo != null)
+			{
+				Matrix relativeMatrix = ComputeWorldMatrix(nifGeom.RelativeTo, UnitFactor);
+				ZoneDrawingExtensions.Mult(ref result, ref relativeMatrix, out intermediateResult);
+				result = intermediateResult;
+			}
+			
+			return result;
+		}
 	}
 }

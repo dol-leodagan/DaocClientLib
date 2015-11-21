@@ -159,13 +159,12 @@ namespace DaocClientLib.Demo
 			gwenProjection = Matrix4.CreateOrthographicOffCenter(0, Width, Height, 0, -1, 1);
 
 			InitializeUI();
-			if (true && _level == null && clientData == null)
+			/*if (true && _level == null && clientData == null)
 			{
-				LoadClient(@"C:\Dark Age of Camelot1118L");
-				//_levelId = 221;
-				_levelId = 209;
-			}
-			
+				LoadClient(@"C:\Dark Age of Camelot_Latest");
+				_levelId = 221;
+				//_levelId = 209;
+			}*/
 		}
 
 		protected override void OnUpdateFrame(FrameEventArgs e)

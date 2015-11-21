@@ -76,14 +76,9 @@ namespace DaocClientLib.Drawing
 		protected TreeReplacementMap TreeReplacement { get; set; }
 		
 		/// <summary>
-		/// TerrainHeightCalculatorCache
-		/// </summary>
-		protected TerrainHeightCalculator TerrainHeightCache { get; set; }
-		
-		/// <summary>
 		/// Matrix To rotate Meshes 
 		/// </summary>
-		protected static Matrix FlipMatrix = Matrix.CreateRotationX((float)(Math.PI / -2f));
+		protected static Matrix RotationMatrix = Matrix.CreateRotationX((float)(Math.PI / -2f));
 
 		/// <summary>
 		/// Layers Categories to Retrieve From Nif Objects
@@ -215,55 +210,7 @@ namespace DaocClientLib.Drawing
 					}
 				}
 			}
-			
 			return result;
-		}
-		
-		/// <summary>
-		/// Add a Nif Geometry Object as an Instanced Mesh with World Matrix Computed
-		/// </summary>
-		/// <param name="geometry">Nif Geometry Description</param>
-		protected void AddNifInstancesYZSwapped(NifGeometry geometry)
-		{
-			AddNifInstancesYZSwapped(new []{geometry});
-		}
-		
-		/// <summary>
-		/// Add Each Nif Geometry as an Instanced Meshes with World Matrix computed
-		/// </summary>
-		/// <param name="geometries">Collection of Nif Geometry</param>
-		protected void AddNifInstancesYZSwapped(IEnumerable<NifGeometry> geometries)
-		{
-			var result = new List<KeyValuePair<int, Matrix>>();
-			foreach (var geometry in geometries)
-			{
-				var trees = TreeReplacement[geometry.FileName];
-				var nifMatrix = geometry.ComputeWorldMatrix(UnitFactor, TerrainHeightCache);
-				Matrix final;
-				ZoneDrawingExtensions.Mult(ref FlipMatrix, ref nifMatrix, out final);
-				nifMatrix = final;
-				
-				// Tree match, Compose Matrix
-				if (trees.Length > 0)
-				{
-					foreach (var tree in trees)
-					{
-						var instance = tree.ComputeWorldMatrix(UnitFactor);
-						Matrix translate;
-						ZoneDrawingExtensions.Mult(ref nifMatrix, ref instance, out translate);
-						nifMatrix = translate;
-					}
-				}
-				
-				// Coord Swap
-				var tmp = nifMatrix.Row3.Z;
-				nifMatrix.Row3.Z = nifMatrix.Row3.Y;
-				nifMatrix.Row3.Y = tmp;
-				
-				result.Add(new KeyValuePair<int, Matrix>(geometry.MeshID, nifMatrix));
-			}
-			
-			InstancesMatrix = InstancesMatrix.Concat(result).ToArray();
 		}
 	}
 }
