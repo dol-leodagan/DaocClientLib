@@ -528,9 +528,11 @@ namespace DaocClientLib
 			}
 			catch (Exception e)
 			{
-				// FIXME : some Zones have no DAT but should be drawable anyway if they're not Terrain...
-				return;
-				throw new ArgumentException(string.Format("No usable sector.dat Found when building Zone ID: {0}", id), "files", e);
+				// Terrains can't be drawn without Scale and Offset
+				if (ZoneType == ZoneType.Terrain)
+					throw new ArgumentException(string.Format("No usable sector.dat Found when building Zone ID: {0}", id), "files", e);
+				else
+					sectorDat = new Dictionary<string, IDictionary<string, string>>();
 			}			
 			
 			// Read Terrain
