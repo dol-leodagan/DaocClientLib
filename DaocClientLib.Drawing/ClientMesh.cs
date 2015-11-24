@@ -88,12 +88,37 @@ namespace DaocClientLib.Drawing
 		#endregion
 
 		#region geometry members
+		/// <summary>
+		/// Doors Collidee Mesh indexed by Door Node Name
+		/// </summary>
 		public Dictionary<string, TriangleCollection> DoorCollidee { get; protected set; }
+		/// <summary>
+		/// Climb Collidee Mesh indexed by Climb Node Name
+		/// </summary>
 		public Dictionary<string, TriangleCollection> ClimbCollidee { get; protected set; }
-		public TriangleCollection Pickee { get; protected set; }
-		public TriangleCollection Collidee { get; protected set; }
-		public TriangleCollection Visible { get; protected set; }
+		
+		protected TriangleCollection m_pickee = new TriangleCollection
+		{ Vertices = new OpenTK.Vector3[0], Indices = new TriangleIndex[0], };
+		/// <summary>
+		/// Pickee Mesh
+		/// </summary>
+		public TriangleCollection Pickee { get { return m_pickee; } protected set { m_pickee = value; } }
+
+		protected TriangleCollection m_collidee = new TriangleCollection
+		{ Vertices = new OpenTK.Vector3[0], Indices = new TriangleIndex[0], };
+		/// <summary>
+		/// Collidee Mesh
+		/// </summary>
+		public TriangleCollection Collidee { get { return m_collidee; } protected set { m_collidee = value; } }
+
+		protected TriangleCollection m_visible = new TriangleCollection
+		{ Vertices = new OpenTK.Vector3[0], Indices = new TriangleIndex[0], };
+		/// <summary>
+		/// Visible Mesh
+		/// </summary>
+		public TriangleCollection Visible { get { return m_visible; } protected set { m_visible = value; } }
 		#endregion
+		
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ClientMesh"/> class.
 		/// </summary>
@@ -166,12 +191,18 @@ namespace DaocClientLib.Drawing
 							else if (CollideeNames.Any(coll => switchNode.Name.Value.Equals(coll, StringComparison.OrdinalIgnoreCase)))
 							{
 								// Is Collidee
-								collidees.Add(switchNode.GetTrianglesFromNode());
+								var tris = switchNode.GetTrianglesFromNode();
+								TriangleCollection result;
+								TriangleWalker.Concat(ref m_collidee, ref tris, out result);
+								Collidee = result;
 							}
 							else if (PickeeNames.Any(pick => switchNode.Name.Value.Equals(pick, StringComparison.OrdinalIgnoreCase)))
 							{
 								// Is Pickee
-								pickees.Add(switchNode.GetTrianglesFromNode());
+								var tris = switchNode.GetTrianglesFromNode();
+								TriangleCollection result;
+								TriangleWalker.Concat(ref m_pickee, ref tris, out result);
+								Pickee = result;
 							}
 							else
 							{
@@ -183,7 +214,10 @@ namespace DaocClientLib.Drawing
 								}
 								
 								// Remaining should be visible
-								visibles.Add(switchNode.GetTrianglesFromNode());
+								var tris = switchNode.GetTrianglesFromNode();
+								TriangleCollection result;
+								TriangleWalker.Concat(ref m_visible, ref tris, out result);
+								Visible = result;
 							}
 						}
 					}
@@ -191,7 +225,10 @@ namespace DaocClientLib.Drawing
 					{
 						// Direct Drawed Mesh (Only Visible)
 						HasRootSwitch = false;
-						visibles.Add(child.GetTrianglesFromNode());
+						var tris = child.GetTrianglesFromNode();
+						TriangleCollection result;
+						TriangleWalker.Concat(ref m_visible, ref tris, out result);
+						Visible = result;
 					}
 				}
 				rootIndex++;
