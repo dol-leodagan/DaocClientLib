@@ -45,7 +45,7 @@ namespace DaocClientLib.Test
 		protected DirectoryInfo extract;
 		protected string loc = @"C:\Dark Age of Camelot1118L";
 		
-		[TestFixtureSetUp]
+		[TestFixtureSetUp, Explicit]
 		public void Init()
 		{
 			client = new ClientDataWrapper(loc);

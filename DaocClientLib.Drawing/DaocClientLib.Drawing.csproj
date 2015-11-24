@@ -106,6 +106,7 @@
   <ItemGroup>
     <Compile Include="CityRenderer.cs" />
     <Compile Include="ClientDrawingWrapper.cs" />
+    <Compile Include="ClientMesh.cs" />
     <Compile Include="DungeonRenderer.cs" />
     <Compile Include="TerrainRenderer.cs" />
     <Compile Include="ZoneDrawingExtensions.cs" />
