@@ -106,24 +106,13 @@ namespace DaocClientLib.Drawing
 				Vertices = vertices.ToArray(),
 				Indices = indices.ToArray(),
 			};
-			var TerrainNormals = Terrain.ComputeNormalLighting();
-			
-			var dictMesh = new Dictionary<string, TriangleCollection>();
-			var dictNorms = new Dictionary<string, Vector3[]>();
-			foreach (var layer in new []{ "pickee", "collidee", "visible", })
-			{
-				var layername = layer;
-				dictMesh.Add(layername, Terrain);
-				dictNorms.Add(layername, TerrainNormals);
-			}
 			
 			// Add Terrain like a Nif
 			var insertid = 0;
 			if (NifCache.Count > 0)
 				insertid = NifCache.Max(kv => kv.Key) + 1;
 			
-			NifCache.Add(insertid, dictMesh);
-			NifNormalsCache.Add(insertid, dictNorms);
+			NifCache.Add(insertid, new ClientMesh("terrain", Terrain, Terrain, Terrain));
 			InstancesMatrix = InstancesMatrix.Concat(new [] { new KeyValuePair<int, Matrix>(insertid, Matrix.Identity) }).ToArray();
 		}
 		

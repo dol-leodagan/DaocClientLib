@@ -57,13 +57,8 @@ namespace DaocClientLib.Drawing
 		/// <summary>
 		/// Nif Primitives Cache
 		/// </summary>
-		public IDictionary<int, IDictionary<string, TriangleCollection>> NifCache { get; protected set; }
-		
-		/// <summary>
-		/// Nif Primitives Cache
-		/// </summary>
-		public IDictionary<int, IDictionary<string, Vector3[]>> NifNormalsCache { get; protected set; }
-		
+		public IDictionary<int, ClientMesh> NifCache { get; protected set; }
+				
 		/// <summary>
 		/// Nif Instances Matrix
 		/// Index Nif Cache Meshes with a World Instance Matrix
@@ -108,8 +103,7 @@ namespace DaocClientLib.Drawing
 			: base(id, files, type)
 		{
 			TreeReplacement = wrapper.TreeReplacement;
-			NifCache = new Dictionary<int, IDictionary<string, TriangleCollection>>();
-			NifNormalsCache = new Dictionary<int, IDictionary<string, Vector3[]>>();
+			NifCache = new Dictionary<int, ClientMesh>();
 			InstancesMatrix = new KeyValuePair<int, Matrix>[0];
 			ClientWrapper = wrapper;			
 		}
@@ -142,14 +136,8 @@ namespace DaocClientLib.Drawing
 			}
 			
 			// Store Layered Nif in Cache
-			var meshes = GetNifMeshesFromName(nif);
+			var meshes = GetNifMeshFromName(nif);
 			NifCache.Add(id, meshes);
-			var meshNormals = new Dictionary<string, Vector3[]>();
-			foreach (var mesh in meshes)
-			{
-				meshNormals.Add(mesh.Key, mesh.Value.ComputeNormalLighting());
-			}
-			NifNormalsCache.Add(id, meshNormals);
 		}
 		
 		/// <summary>
@@ -157,60 +145,17 @@ namespace DaocClientLib.Drawing
 		/// </summary>
 		/// <param name="nifname"></param>
 		/// <returns></returns>
-		protected IDictionary<string, TriangleCollection> GetNifMeshesFromName(string nifname)
+		protected ClientMesh GetNifMeshFromName(string nifname)
 		{
-			var result = new Dictionary<string, TriangleCollection>();
 			// Get File Bytes
 			var bytes = ClientWrapper.SearchRawFileOrPackaged(nifname, new []{ ".npk", ".mpk" });
 			
 			if (bytes != null)
 			{
-				using (var stream = new MemoryStream(bytes))
-				{
-					using (var reader = new BinaryReader(stream))
-					{
-						var nif = new NiFile(reader);
-						// Extract each Layer Type
-						foreach (var layers in Layers)
-						{
-							TriangleCollection tris = new TriangleCollection { Vertices = new Vector3[0], Indices = new TriangleIndex[0] };
-							// Try to find the requested Layer or iterate for alternate layer
-							foreach (var layer in layers.Value)
-							{
-								var nifLayer = nif.GetTriangleFromCategories(string.Format("^{0}$", layer));
-								// if we have any result, concat triangle collection and break from loop
-								if (nifLayer.Count > 0)
-								{
-									tris = nifLayer.Select(kv => kv.Value).Aggregate(new TriangleCollection { Vertices = new Vector3[0], Indices = new TriangleIndex[0] },
-									                                                 (t1, t2) =>
-									                                                 {
-									                                                 	TriangleCollection concat;
-									                                                 	TriangleWalker.Concat(ref t1, ref t2, out concat);
-									                                                 	return concat;
-									                                                 });
-									break;
-								}
-							}
-							// Concat Triangle to Existing Nif Layers or add to result
-							if (tris.Indices.Length > 0)
-							{
-								TriangleCollection existing;
-								if (result.TryGetValue(layers.Key, out existing))
-								{
-									TriangleCollection concat;
-									TriangleWalker.Concat(ref existing, ref tris, out concat);
-									result[layers.Key] = concat;
-								}
-								else
-								{
-									result.Add(layers.Key, tris);
-								}
-							}
-						}
-					}
-				}
+				return new ClientMesh(nifname, bytes);
 			}
-			return result;
+			
+			return null;
 		}
 	}
 }

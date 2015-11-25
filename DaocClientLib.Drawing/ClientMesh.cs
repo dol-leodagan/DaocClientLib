@@ -33,6 +33,15 @@ namespace DaocClientLib.Drawing
 	using Niflib;
 	using Niflib.Extensions;
 	
+	#if OpenTK
+	using OpenTK;
+	using Matrix = OpenTK.Matrix4;
+	#elif SharpDX
+	using SharpDX;
+	#elif MonoGame
+	using Microsoft.Xna.Framework;
+	#endif
+
 	/// <summary>
 	/// ClientMesh extract Nif Mesh Rendering.
 	/// </summary>
@@ -98,21 +107,21 @@ namespace DaocClientLib.Drawing
 		public Dictionary<string, TriangleCollection> ClimbCollidee { get; protected set; }
 		
 		protected TriangleCollection m_pickee = new TriangleCollection
-		{ Vertices = new OpenTK.Vector3[0], Indices = new TriangleIndex[0], };
+		{ Vertices = new Vector3[0], Indices = new TriangleIndex[0], };
 		/// <summary>
 		/// Pickee Mesh
 		/// </summary>
 		public TriangleCollection Pickee { get { return m_pickee; } protected set { m_pickee = value; } }
 
 		protected TriangleCollection m_collidee = new TriangleCollection
-		{ Vertices = new OpenTK.Vector3[0], Indices = new TriangleIndex[0], };
+		{ Vertices = new Vector3[0], Indices = new TriangleIndex[0], };
 		/// <summary>
 		/// Collidee Mesh
 		/// </summary>
 		public TriangleCollection Collidee { get { return m_collidee; } protected set { m_collidee = value; } }
 
 		protected TriangleCollection m_visible = new TriangleCollection
-		{ Vertices = new OpenTK.Vector3[0], Indices = new TriangleIndex[0], };
+		{ Vertices = new Vector3[0], Indices = new TriangleIndex[0], };
 		/// <summary>
 		/// Visible Mesh
 		/// </summary>
@@ -125,20 +134,47 @@ namespace DaocClientLib.Drawing
 		/// <param name="nifName">Name of the Nif File</param>
 		/// <param name="fileContent">Content of the Nif File</param>
 		public ClientMesh(string nifName, byte[] fileContent)
+			: this(nifName)
 		{
 			if (string.IsNullOrEmpty(nifName))
 				throw new ArgumentNullException("nifName");
 			if (fileContent == null || fileContent.Length < 1)
 				throw new ArgumentNullException("fileContent");
 			
-				using (var stream = new MemoryStream(fileContent))
+			using (var stream = new MemoryStream(fileContent))
+			{
+				using (var reader = new BinaryReader(stream))
 				{
-					using (var reader = new BinaryReader(stream))
-					{
-						var nif = new NiFile(reader);
-						LoadGeometry(nif);
-					}
+					var nif = new NiFile(reader);
+					LoadGeometry(nif);
 				}
+			}
+		}
+		
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ClientMesh"/> class with predefined Mesh.
+		/// </summary>
+		/// <param name="nifName">Name of the Nif File</param>
+		/// <param name="pickee">pickee Mesh</param>
+		/// <param name="collidee">collidee Mesh</param>
+		/// <param name="visible">visible Mesh</param>
+		public ClientMesh(string nifName, TriangleCollection pickee, TriangleCollection collidee, TriangleCollection visible)
+			: this(nifName)
+		{
+			Pickee = pickee;
+			Collidee = collidee;
+			Visible = visible;
+		}
+		
+		/// <summary>
+		/// Initializes a new "base" instance of the <see cref="ClientMesh"/> class.
+		/// </summary>
+		/// <param name="nifName">Name of the Nif File</param>
+		protected ClientMesh(string nifName)
+		{
+			NifName = nifName;
+			ClimbCollidee = new Dictionary<string, TriangleCollection>();
+			DoorCollidee = new Dictionary<string, TriangleCollection>();
 		}
 		
 		/// <summary>
@@ -149,9 +185,6 @@ namespace DaocClientLib.Drawing
 		{
 			HasRootSwitch = true;
 			int rootIndex = 0;
-			var collidees = new List<TriangleCollection>();
-			var pickees = new List<TriangleCollection>();
-			var visibles = new List<TriangleCollection>();
 			foreach (var root in nif.GetRoots())
 			{
 				// Get Direct Children

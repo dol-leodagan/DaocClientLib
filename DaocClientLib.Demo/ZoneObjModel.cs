@@ -53,26 +53,56 @@ namespace DaocClientLib.Demo
 	/// </summary>
 	public class ZoneObjModel
 	{
+		/// <summary>
+		/// Total Triange count for this Zone Model
+		/// </summary>
 		public int TriangleCount { get; protected set; }
+		/// <summary>
+		/// Pre Calculated Bounding Box for this Zone Model
+		/// </summary>
 		public BBox3 BoundingBox { get; protected set; }
+		/// <summary>
+		/// ZoneRenderer Object for Extracting Primitives from Zone
+		/// </summary>
 		public ZoneRenderer Renderer { get; protected set; }
 		
 		private ModelType m_type;
+		/// <summary>
+		/// Zone Model Layer Type
+		/// </summary>
 		public ModelType Type { get { return m_type; } set { m_type = value; Update(); } }
 		
+		/// <summary>
+		/// Array of Vertex Buffer index.
+		/// </summary>
 		protected uint[] VBOids;
+		/// <summary>
+		/// Array of Normal Buffer index.
+		/// </summary>
 		protected uint[] NBOids;
+		/// <summary>
+		/// Array of Index buffer index.
+		/// </summary>
 		protected uint[] IBOids;
 		
+		/// <summary>
+		/// Dictionary Resolving Graphic buffer index to Nif Buffer Index (and Triangle count)
+		/// </summary>
 		protected Dictionary<int, KeyValuePair<int, int>> NifIdBufferIndex;
 		
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ZoneObjModel"/> class.
+		/// </summary>
+		/// <param name="renderer">Zone Primitive Renderer</param>
 		public ZoneObjModel(ZoneRenderer renderer)
 		{
 			Renderer = renderer;
 			Type = ModelType.Visible;
-			Update();
 		}
 		
+		/// <summary>
+		/// Update/Create Graphic Buffer index and store current Meshes Data 
+		/// </summary>
 		protected void Update()
 		{
 			TriangleCount = 0;
@@ -105,7 +135,6 @@ namespace DaocClientLib.Demo
 				NifIdBufferIndex = Renderer.NifCache.ToDictionary(kv => kv.Key, kv => new KeyValuePair<int, int>(index++, 0));
 			}
 			
-			string key = string.Empty;
 			switch(Type)
 			{
 				case ModelType.Pickee:
@@ -123,19 +152,26 @@ namespace DaocClientLib.Demo
 			foreach (var mesh in Renderer.NifCache)
 			{						
 				TriangleCollection tris;
-				if (!mesh.Value.TryGetValue(key, out tris))
-					continue;
-				
-				IDictionary<string, Vector3[]> normsLayers;
-				Vector3[] norms;
-				if (!Renderer.NifNormalsCache.TryGetValue(mesh.Key, out normsLayers))
-					continue;
-				if (!normsLayers.TryGetValue(key, out norms))
-					continue;
-				
+				switch(Type)
+				{
+					case ModelType.Pickee:
+						tris = mesh.Value.Pickee;
+						break;
+					case ModelType.Collidee:
+						tris = mesh.Value.Collidee;
+						break;
+					case ModelType.Visible:
+					default:
+						tris = mesh.Value.Visible;
+						break;
+				}
+								
 				KeyValuePair<int, int> buffer;
 				if (!NifIdBufferIndex.TryGetValue(mesh.Key, out buffer))
 					continue;
+				
+				// Retrieve Normals for Lighting
+				var norms = tris.ComputeNormalLighting();
 				
 				// Bind Vertices Buffer
 				GL.BindBuffer(BufferTarget.ArrayBuffer, VBOids[buffer.Key]);
@@ -158,6 +194,9 @@ namespace DaocClientLib.Demo
 			BoundingBox = Triangles().GetBoundingBox();
 		}
 		
+		/// <summary>
+		/// Draw the Zone Object Model from content in Graphic Buffers
+		/// </summary>
 		public void Draw()
 		{
 			if (VBOids == null || NBOids == null || IBOids == null)
@@ -216,6 +255,9 @@ namespace DaocClientLib.Demo
 			GL.FrontFace(FrontFaceDirection.Ccw);
 		}
 		
+		/// <summary>
+		/// Unload and Clean Graphic Buffers
+		/// </summary>
 		public void Unload()
 		{
 			foreach (var buff in VBOids)
@@ -226,35 +268,45 @@ namespace DaocClientLib.Demo
 				GL.DeleteBuffer(buff);
 		}
 		
+		/// <summary>
+		/// Enumerate all Triangles from current Zone Model Type
+		/// (Can be used for NavMesh computing)
+		/// </summary>
+		/// <returns>Raw Triangle Enumerable of All instances in the Zone</returns>
 		public IEnumerable<Triangle3> Triangles()
 		{
-			string key = string.Empty;
-			switch(Type)
-			{
-				case ModelType.Pickee:
-					key = "pickee";
-					break;
-				case ModelType.Collidee:
-					key = "collidee";
-					break;
-				case ModelType.Visible:
-				default:
-					key = "visible";
-					break;
-			}
-			
 			foreach (var mesh in Renderer.InstancesMatrix)
 			{
-				IDictionary<string, TriangleCollection> layers;
+				ClientMesh layers;
 				if (!Renderer.NifCache.TryGetValue(mesh.Key, out layers))
 					continue;
+
 				TriangleCollection tris;
-				if (!layers.TryGetValue(key, out tris))
-					continue;
-				
+				switch(Type)
+				{
+					case ModelType.Pickee:
+						tris = layers.Pickee;
+						break;
+					case ModelType.Collidee:
+						tris = layers.Collidee;
+						break;
+					case ModelType.Visible:
+					default:
+						tris = layers.Visible;
+						break;
+				}
 				var matrix = mesh.Value;
 				
-				foreach (var tri in tris.AsEnumerable<Triangle3>((a, b, c) => new Triangle3(Vector3.Transform(a, matrix), Vector3.Transform(b, matrix), Vector3.Transform(c, matrix))))
+				foreach (var tri in tris.AsEnumerable<Triangle3>((a, b, c) =>
+				                                                 {
+				                                                 	Vector3 transA;
+				                                                 	Vector3 transB;
+				                                                 	Vector3 transC;
+				                                                 	Vector3.Transform(ref a, ref matrix, out transA);
+				                                                 	Vector3.Transform(ref b, ref matrix, out transB);
+				                                                 	Vector3.Transform(ref c, ref matrix, out transC);
+				                                                 	return new Triangle3(transA, transB, transC);
+				                                                 }))
 					yield return tri;
 			}
 			yield break;
