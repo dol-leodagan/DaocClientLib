@@ -135,20 +135,6 @@ namespace DaocClientLib.Demo
 				NifIdBufferIndex = Renderer.NifCache.ToDictionary(kv => kv.Key, kv => new KeyValuePair<int, int>(index++, 0));
 			}
 			
-			switch(Type)
-			{
-				case ModelType.Pickee:
-					key = "pickee";
-					break;
-				case ModelType.Collidee:
-					key = "collidee";
-					break;
-				case ModelType.Visible:
-				default:
-					key = "visible";
-					break;
-			}
-			
 			foreach (var mesh in Renderer.NifCache)
 			{						
 				TriangleCollection tris;
