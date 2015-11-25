@@ -246,12 +246,15 @@ namespace DaocClientLib.Demo
 		/// </summary>
 		public void Unload()
 		{
-			foreach (var buff in VBOids)
-				GL.DeleteBuffer(buff);
-			foreach (var buff in NBOids)
-				GL.DeleteBuffer(buff);
-			foreach (var buff in IBOids)
-				GL.DeleteBuffer(buff);
+			if (VBOids != null)
+				foreach (var buff in VBOids)
+					GL.DeleteBuffer(buff);
+			if (NBOids != null)
+				foreach (var buff in NBOids)
+					GL.DeleteBuffer(buff);
+			if (IBOids != null)
+				foreach (var buff in IBOids)
+					GL.DeleteBuffer(buff);
 		}
 		
 		/// <summary>
