@@ -32,7 +32,7 @@ Download : https://github.com/dol-leodagan/DaocClientLib/releases/latest
 
 ## How to build
 
-    git clone https://github.com/dol-leodagan/DaocClientLib
+    git clone --recursive https://github.com/dol-leodagan/DaocClientLib
     cd DaocClientLib
     nuget restore
 
