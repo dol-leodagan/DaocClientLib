@@ -82,6 +82,7 @@
     <Compile Include="Zone\NifGeometry.cs" />
     <Compile Include="Zone\RiverGeometry.cs" />
     <Compile Include="Zone\TerrainHeightCalculator.cs" />
+    <Compile Include="Zone\DungeonWaterGeometry.cs" />
     <Compile Include="Zone\ZoneData.cs" />
     <Compile Include="Zone\ZoneDataList.cs" />
     <Compile Include="Zone\ZoneGeometry.cs" />

@@ -163,7 +163,7 @@ namespace DaocClientLib.Demo
 			{
 				LoadClient(@"C:\Dark Age of Camelot_Latest");
 				//_levelId = 221;
-				_levelId = 207;
+				_levelId = 79;
 			}
 		}
 

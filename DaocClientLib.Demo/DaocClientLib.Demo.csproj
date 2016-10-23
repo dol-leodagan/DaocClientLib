@@ -97,6 +97,8 @@
     <ProjectReference Include="..\DaocClientLib.Drawing\DaocClientLib.Drawing.csproj">
       <Project>{A2AFACEF-518E-4CC2-8A1A-972B6CFEF648}</Project>
       <Name>DaocClientLib.Drawing</Name>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\DaocClientLib\DaocClientLib.csproj">
       <Project>{B902618C-DA35-4C20-AEEB-C1D80912B527}</Project>

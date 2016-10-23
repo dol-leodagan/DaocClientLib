@@ -102,17 +102,38 @@ namespace DaocClientLib
 		/// </summary>
 		private string DungeonPropFile { get { return "dungeon.prop"; } }
 		/// <summary>
-		/// This Zone Dungeon Chunk File
+		/// This Zone Dungeon Water File
+		/// </summary>
+		private string DungeonWaterFile { get { return "dungeon.water"; } }
+		/// <summary>
+		/// This Zone Dungeon WaterLoc File
+		/// </summary>
+		private string DungeonWaterLocFile { get { return "dungeon.water.csv"; } }
+		/// <summary>
+		/// This Zone SkyCity Chunk File
 		/// </summary>
 		private string SkyCityChunkFile { get { return "skycity.chunk"; } }
 		/// <summary>
-		/// This Zone Dungeon Place File
+		/// This Zone SkyCity Place File
 		/// </summary>
 		private string SkyCityPlaceFile { get { return "skycity.place"; } }
 		/// <summary>
-		/// This Zone Dungeon Props File
+		/// This Zone SkyCity Props File
 		/// </summary>
 		private string SkyCityPropFile { get { return "skycity.prop"; } }
+		/// <summary>
+		/// This Zone SkyCity Water File
+		/// </summary>
+		private string SkyCityWaterFile { get { return "skycity.water"; } }
+		/// <summary>
+		/// This Zone SkyCity WaterLoc File
+		/// </summary>
+		private string SkyCityWaterLocFile { get { return "skycity.water.csv"; } }
+		
+		/// <summary>
+		/// This Zone Nif Proxy File for Replacements.
+		/// </summary>
+		private string NifProxyFile { get { return "nifproxy.csv"; } }
 		/// <summary>
 		/// This Zone Terrain Nifs File
 		/// </summary>
@@ -198,31 +219,19 @@ namespace DaocClientLib
 		}
 		
 		/// <summary>
-		/// Get Terrain Water Index Map, Only existing Water defs are presents in the Collection
+		/// Get Terrain Water Index Map
 		/// </summary>
-		public IDictionary<int, IDictionary<int, RiverGeometry>> WaterIndexMap
+		public byte[,] WaterIndexMap
 		{
 			get
 			{
 				var waterImg = m_files.GetFileDataFromPackage(DatPackage, WaterFile);
 				var waterPcx = new PCXDecoder(waterImg).PcxImage;
-				var result = new Dictionary<int, IDictionary<int, RiverGeometry>>();
-				for (int x = 0 ; x < waterPcx.Width ; x++)
-				{
-					for (int y = 0 ; y < waterPcx.Height ; y++)
-					{
-						var grey = waterPcx.GetPixel(x, y).R;
-						var river = grey < Rivers.Length ? Rivers.FirstOrDefault(r => r.ID == grey) : null;
-						
-						if (river != null)
-						{
-							if (!result.ContainsKey(x))
-								result[x] = new Dictionary<int, RiverGeometry>();
+				var result = new byte[waterPcx.Width, waterPcx.Height];
 
-							result[x][y] = river;
-						}
-					}
-				}
+				for (int x = 0 ; x < waterPcx.Width ; x++)
+					for (int y = 0 ; y < waterPcx.Height ; y++)
+						result[x, y] = waterPcx.GetPixel(x, y).R;
 				
 				return result;
 			}
@@ -296,9 +305,36 @@ namespace DaocClientLib
 		{
 			get
 			{
-				if (ZoneType == ZoneType.SkyCity)
-					return m_files.GetFileDataFromPackage(DatPackage, SkyCityChunkFile).ReadCSVFile().Select(line => line.FirstOrDefault()).ToArray();
-				return m_files.GetFileDataFromPackage(DatPackage, DungeonChunkFile).ReadCSVFile().Select(line => line.FirstOrDefault()).ToArray();
+
+				string[][] proxies;
+				try
+				{
+					proxies = m_files.GetFileDataFromPackage(DatPackage, NifProxyFile).ReadCSVFile();
+				}
+				catch (FileNotFoundException ex)
+				{
+					proxies = new string[0][];
+				}
+
+				var chunks = m_files.GetFileDataFromPackage(DatPackage, ZoneType == ZoneType.SkyCity ? SkyCityChunkFile : DungeonChunkFile)
+					.ReadCSVFile()
+					.Select(line => {
+					        	// Check for proxies
+					        	var nif = line.FirstOrDefault();
+					        	if (!string.IsNullOrWhiteSpace(nif))
+					        	{
+					        		var altname = proxies.FirstOrDefault(proxy => nif.Equals(proxy.FirstOrDefault(), StringComparison.OrdinalIgnoreCase));
+					        		
+					        		if (altname != null && altname.Length > 0 && !string.IsNullOrWhiteSpace(altname[1]))
+					        			nif = altname[1];
+					        	}
+					        	
+					        	return nif;
+					        })
+					.ToArray();
+
+				
+				return chunks;
 			}
 		}
 		
@@ -352,8 +388,7 @@ namespace DaocClientLib
 				var chunks = DungeonChunk;
 				var places = DungeonPlaces;
 				int index = -1;
-				var props = ZoneType == ZoneType.SkyCity ? SkyCityPropFile : DungeonPropFile;
-				return m_files.GetFileDataFromPackage(DatPackage, props).ReadCSVFile()
+				return m_files.GetFileDataFromPackage(DatPackage, ZoneType == ZoneType.SkyCity ? SkyCityPropFile : DungeonPropFile).ReadCSVFile()
 					.Select(line =>
 					        {
 					        	if (line.Length < 11)
@@ -381,6 +416,55 @@ namespace DaocClientLib
 					        	
 					        	return new NifGeometry(nifId, index, nifName, nifName, X, Y, Z, Scale, Angle, RotX, RotY, RotZ, false, false, place);
 					        }).Where(nif => nif != null).ToArray();
+			}
+		}
+		
+		public Dictionary<int, DungeonWaterGeometry> DungeonWaterDefs
+		{
+			get
+			{
+				return m_files.GetFileDataFromPackage(DatPackage, ZoneType == ZoneType.SkyCity ? SkyCityWaterFile : DungeonWaterFile).ReadCSVFile()
+					.Select(water => {
+					        	if (water.Length < 16)
+					        		return null;
+
+					        	var id = int.Parse(water[0]);
+
+					        	var X1 = float.Parse(water[1], CultureInfo.InvariantCulture);
+					        	var Y1 = float.Parse(water[2], CultureInfo.InvariantCulture);
+					        	var Z1 = float.Parse(water[3], CultureInfo.InvariantCulture);
+					        	var X2 = float.Parse(water[4], CultureInfo.InvariantCulture);
+					        	var Y2 = float.Parse(water[5], CultureInfo.InvariantCulture);
+					        	var Z2 = float.Parse(water[6], CultureInfo.InvariantCulture);
+					        	var X3 = float.Parse(water[7], CultureInfo.InvariantCulture);
+					        	var Y3 = float.Parse(water[8], CultureInfo.InvariantCulture);
+					        	var Z3 = float.Parse(water[9], CultureInfo.InvariantCulture);
+					        	var X4 = float.Parse(water[10], CultureInfo.InvariantCulture);
+					        	var Y4 = float.Parse(water[11], CultureInfo.InvariantCulture);
+					        	var Z4 = float.Parse(water[12], CultureInfo.InvariantCulture);
+					        	var TransX = float.Parse(water[13], CultureInfo.InvariantCulture);
+					        	var TransY = float.Parse(water[14], CultureInfo.InvariantCulture);
+					        	var TransZ = float.Parse(water[15], CultureInfo.InvariantCulture);
+					        	
+					        	return new DungeonWaterGeometry(id, X1, Y1, Z1, X2, Y2, Z2, X3, Y3, Z3, X4, Y4, Z4, TransX, TransY, TransZ);
+					        }).Where(water => water != null).ToDictionary(kv => kv.ID, kv => kv);
+			}
+		}
+		
+		public Dictionary<int, int> DungeonWaterLocs
+		{
+			get
+			{
+				return m_files.GetFileDataFromPackage(DatPackage, ZoneType == ZoneType.SkyCity ? SkyCityWaterLocFile : DungeonWaterLocFile).ReadCSVFile()
+					.Select(loc => {
+					        	if (loc.Length < 2)
+					        		return null;
+					        	
+					        	var PlaceID = int.Parse(loc[0]);
+					        	var WaterID = int.Parse(loc[1]);
+					        	
+					        	return new { PlaceID, WaterID };
+					        }).Where(loc => loc != null).ToDictionary(kv => kv.PlaceID, kv => kv.WaterID);
 			}
 		}
 		
@@ -531,8 +615,8 @@ namespace DaocClientLib
 				// Terrains can't be drawn without Scale and Offset
 				if (ZoneType == ZoneType.Terrain)
 					throw new ArgumentException(string.Format("No usable sector.dat Found when building Zone ID: {0}", id), "files", e);
-				else
-					sectorDat = new Dictionary<string, IDictionary<string, string>>();
+
+				sectorDat = new Dictionary<string, IDictionary<string, string>>();
 			}			
 			
 			// Read Terrain
